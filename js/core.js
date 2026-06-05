@@ -1,0 +1,286 @@
+/* ===================================================================
+   SPACE KINGS — core.js
+   Game state, stat math, item generation, XP/levels, combatant builders.
+   =================================================================== */
+(function () {
+  const SK = (window.SK = window.SK || {});
+
+  /* ---------------- RNG helpers ---------------- */
+  const rand = () => Math.random();
+  const randInt = (a, b) => Math.floor(a + Math.random() * (b - a + 1));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  SK.rand = rand; SK.randInt = randInt; SK.pick = pick; SK.uid = uid;
+
+  /* ---------------- Runtime state ---------------- */
+  SK.state = { save: null, mission: null };
+  SK.save = function () { if (SK.state.save) SK.Storage.save(SK.state.save); };
+
+  /* ---------------- New save ---------------- */
+  SK.newSave = function (name, appearance) {
+    return {
+      name,
+      appearance,
+      shipName: "S.S. " + pick(SK.PLANET_NAMES),
+      level: 1,
+      xp: 0,
+      credits: 150,
+      equipped: {
+        char: { weapon: null, helmet: null, armor: null, gloves: null, boots: null, accessory: null },
+        ship: { primary: null, shieldGen: null, hullPlate: null, engine: null, targeting: null, reactor: null },
+      },
+      inventory: [],
+      robotsOwned: [],
+      robotTeam: [],
+      shop: { char: [], ship: [], robots: [], stockLevel: 1, refreshedAt: 0 },
+      stats: { planetsCleared: 0, shipsDefeated: 0, boarded: 0, kills: 0 },
+      createdAt: Date.now(),
+    };
+  };
+
+  /* ---------------- Base stats by level ---------------- */
+  SK.baseCharStats = function (level) {
+    return {
+      hp: 100 + (level - 1) * 22,
+      attack: 12 + (level - 1) * 3,
+      defense: 5 + (level - 1) * 2,
+      speed: 10 + (level - 1) * 1,
+      crit: 5,
+      critDmg: 50,
+      luck: 0,
+    };
+  };
+  SK.baseShipStats = function (level) {
+    return {
+      hull: 220 + (level - 1) * 28,
+      shield: 60 + (level - 1) * 9,
+      weapon: 18 + (level - 1) * 3,
+      targeting: 5,
+      engine: 12 + (level - 1) * 1,
+    };
+  };
+
+  function addStats(target, src) {
+    if (!src) return;
+    for (const k in src) target[k] = (target[k] || 0) + src[k];
+  }
+
+  /* ---------------- Robots ---------------- */
+  SK.robotDef = (key) => SK.ROBOT_CATALOG.find((r) => r.key === key);
+  SK.ownedRobot = (save, id) => save.robotsOwned.find((r) => r.id === id);
+
+  /* ---------------- Aggregate stats ---------------- */
+  SK.getCharStats = function (save) {
+    const total = SK.baseCharStats(save.level);
+    for (const slot in save.equipped.char) addStats(total, save.equipped.char[slot]?.stats);
+    for (const id of save.robotTeam) {
+      const inst = SK.ownedRobot(save, id);
+      if (inst) addStats(total, SK.robotDef(inst.key)?.stats);
+    }
+    return total;
+  };
+  SK.getShipStats = function (save) {
+    const total = SK.baseShipStats(save.level);
+    for (const slot in save.equipped.ship) addStats(total, save.equipped.ship[slot]?.stats);
+    return total;
+  };
+
+  /* ---------------- Rarity roll ---------------- */
+  // rareBoost > 1 increases the odds of rare/epic/legendary (used by bosses & coffers)
+  SK.rollRarity = function (luck, rareBoost) {
+    luck = luck || 0; rareBoost = rareBoost || 1;
+    const w = {};
+    let total = 0;
+    for (const r of SK.RARITY_ORDER) {
+      let weight = SK.RARITIES[r].weight;
+      if (r !== "common") weight *= 1 + luck * 0.02;
+      if (r === "rare" || r === "epic" || r === "legendary") weight *= rareBoost;
+      w[r] = weight; total += weight;
+    }
+    let roll = Math.random() * total;
+    for (const r of SK.RARITY_ORDER) { roll -= w[r]; if (roll <= 0) return r; }
+    return "common";
+  };
+
+  /* ---------------- Item generation ---------------- */
+  function buildName(def, rarity) {
+    let name = pick(SK.NAME_PREFIX) + " " + pick(def.names);
+    if (rarity === "epic" || rarity === "legendary") name += " " + pick(SK.NAME_SUFFIX);
+    return name;
+  }
+
+  SK.generateItem = function (opts) {
+    opts = opts || {};
+    const domain = opts.domain || "char";
+    const slots = domain === "char" ? SK.CHAR_SLOTS : SK.SHIP_SLOTS;
+    const unit = domain === "char" ? SK.CHAR_STAT_UNIT : SK.SHIP_STAT_UNIT;
+    const allKeys = Object.keys(unit);
+    const level = opts.level || 1;
+
+    let slotKey = opts.slot;
+    if (!slotKey) {
+      if (opts.focusSlot && rand() < 0.6) slotKey = opts.focusSlot;
+      else slotKey = pick(Object.keys(slots));
+    }
+    const def = slots[slotKey];
+    const rarity = opts.rarity || SK.rollRarity(opts.luck || 0, opts.rareBoost || 1);
+    const rar = SK.RARITIES[rarity];
+    const levelScale = 1 + (level - 1) * 0.12;
+    const variance = () => 0.85 + rand() * 0.3;
+
+    const stats = {};
+    const primaryKey = def.primary;
+    stats[primaryKey] = Math.max(1, Math.round(unit[primaryKey] * levelScale * rar.statMult * variance()));
+
+    // bonus stats
+    const pool = def.secondaries.slice();
+    for (const k of allKeys) if (k !== primaryKey && !pool.includes(k)) pool.push(k);
+    let added = 0;
+    for (let i = 0; i < pool.length && added < rar.bonusStats; i++) {
+      const k = pool[i];
+      if (k === primaryKey || stats[k]) continue;
+      stats[k] = Math.max(1, Math.round(unit[k] * levelScale * rar.statMult * 0.4 * variance()));
+      added++;
+    }
+
+    return {
+      id: uid(),
+      domain,
+      slot: slotKey,
+      slotLabel: def.label,
+      rarity,
+      level,
+      icon: def.icon,
+      name: buildName(def, rarity),
+      stats,
+      value: Math.max(1, Math.round(8 * rar.valueMult * levelScale)),
+    };
+  };
+
+  /* ---------------- Stat delta (for loot cards) ---------------- */
+  SK.statDelta = function (save, item) {
+    const equipped = save.equipped[item.domain][item.slot] || null;
+    const meta = item.domain === "char" ? SK.CHAR_STAT_META : SK.SHIP_STAT_META;
+    const keys = [];
+    for (const k in meta) {
+      if ((item.stats && item.stats[k] != null) || (equipped && equipped.stats[k] != null)) keys.push(k);
+    }
+    return keys.map((k) => {
+      const cur = equipped ? equipped.stats[k] || 0 : 0;
+      const nw = item.stats[k] || 0;
+      return { key: k, meta: meta[k], from: cur, to: nw, delta: nw - cur };
+    });
+  };
+
+  /* ---------------- Inventory / equip / sell ---------------- */
+  function removeFromInventory(save, id) {
+    const i = save.inventory.findIndex((it) => it.id === id);
+    if (i >= 0) save.inventory.splice(i, 1);
+  }
+
+  SK.equipItem = function (save, item) {
+    removeFromInventory(save, item.id);
+    const old = save.equipped[item.domain][item.slot];
+    save.equipped[item.domain][item.slot] = item;
+    if (old) save.inventory.push(old);
+    SK.save();
+    return old;
+  };
+
+  SK.sellItem = function (save, item) {
+    removeFromInventory(save, item.id);
+    save.credits += item.value;
+    SK.save();
+    return item.value;
+  };
+
+  SK.unequip = function (save, domain, slot) {
+    const it = save.equipped[domain][slot];
+    if (!it) return;
+    save.equipped[domain][slot] = null;
+    save.inventory.push(it);
+    SK.save();
+  };
+
+  SK.addCredits = function (save, n) {
+    save.credits = Math.max(0, save.credits + n);
+    SK.save();
+  };
+
+  /* ---------------- XP / levels ---------------- */
+  SK.xpToNext = (level) => Math.round(80 * Math.pow(level, 1.45));
+  SK.addXP = function (save, amount) {
+    save.xp += amount;
+    const leveled = [];
+    while (save.xp >= SK.xpToNext(save.level)) {
+      save.xp -= SK.xpToNext(save.level);
+      save.level++;
+      leveled.push(save.level);
+    }
+    SK.save();
+    return leveled;
+  };
+
+  /* ---------------- Combatant builders ---------------- */
+  SK.makePlayerCombatant = function (save) {
+    const s = SK.getCharStats(save);
+    const team = save.robotTeam.map((id) => {
+      const inst = SK.ownedRobot(save, id);
+      return inst ? SK.robotDef(inst.key)?.icon : null;
+    }).filter(Boolean);
+    return {
+      side: "player", name: save.name, icon: "🧑‍🚀",
+      weaponIcon: save.equipped.char.weapon ? save.equipped.char.weapon.icon : "🔫",
+      maxHp: s.hp, hp: s.hp, atk: s.attack, def: s.defense, spd: Math.max(1, s.speed),
+      critPct: s.crit, critDmgPct: s.critDmg, evasionPct: 0, shield: 0, maxShield: 0,
+      robots: team,
+    };
+  };
+
+  SK.makeEnemyCombatant = function (opts) {
+    const type = opts.type;
+    const level = opts.level;
+    const isBoss = !!opts.isBoss;
+    const tpl = pick(SK.ENEMY_POOLS[type]);
+    const hpMult = isBoss ? 1.7 : 0.8;
+    const atkMult = isBoss ? 1.05 : 0.8;
+    const defMult = isBoss ? 1.1 : 0.7;
+    return {
+      side: "enemy", name: tpl.name, icon: tpl.icon, isBoss,
+      maxHp: Math.round((90 + level * 26) * hpMult),
+      hp: Math.round((90 + level * 26) * hpMult),
+      atk: Math.round((10 + level * 2.6) * atkMult),
+      def: Math.round((3 + level * 1.3) * defMult),
+      spd: isBoss ? 9 : 7 + randInt(0, 4),
+      critPct: isBoss ? 10 : 5, critDmgPct: 50,
+      evasionPct: isBoss ? 5 : 0, shield: 0, maxShield: 0,
+    };
+  };
+
+  SK.makePlayerShip = function (save) {
+    const s = SK.getShipStats(save);
+    return {
+      side: "player", isShip: true, name: save.shipName, icon: "🚀", weaponIcon: "💠",
+      maxHp: s.hull, hp: s.hull, shield: s.shield, maxShield: s.shield,
+      atk: s.weapon, def: 0, spd: Math.max(1, s.engine),
+      critPct: s.targeting, critDmgPct: 50,
+      evasionPct: Math.min(35, (s.engine / (s.engine + 60)) * 100),
+    };
+  };
+
+  SK.makeEnemyShip = function (opts) {
+    const level = opts.level;
+    const engine = 8 + randInt(0, 3);
+    return {
+      side: "enemy", isShip: true, name: opts.name, icon: opts.icon,
+      maxHp: Math.round(160 + level * 24), hp: Math.round(160 + level * 24),
+      shield: Math.round(36 + level * 7), maxShield: Math.round(36 + level * 7),
+      atk: Math.round(9 + level * 2), def: 0, spd: engine,
+      critPct: 6, critDmgPct: 50,
+      evasionPct: Math.min(28, (engine / (engine + 60)) * 100),
+    };
+  };
+
+  /* ---------------- XP reward helpers ---------------- */
+  SK.xpForKill = (level, isBoss) => Math.round((isBoss ? 70 : 18) * (1 + level * 0.25));
+})();
