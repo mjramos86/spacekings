@@ -315,6 +315,24 @@ button,input{font-family:inherit;}
 @keyframes floorrun{from{background-position:0 0,0 0,0 0} to{background-position:0 60px,0 60px,0 0}}
 .run-scene.paused .run-floor{animation-play-state:paused;}
 
+/* space mode (ship-vs-ship battles): starfield instead of the corridor grid */
+.run-stars{position:absolute; inset:0; overflow:hidden; display:none; z-index:0;}
+.run-scene.space .run-stars{display:block;}
+.run-scene.space .run-floor,.run-scene.space .run-ceiling{display:none;}
+.run-scene.space{background:radial-gradient(circle at 50% 38%, #0b1838 0%, #050814 55%, #03040c 100%);}
+.rs-neb{position:absolute; inset:-10%;
+  background:radial-gradient(38% 30% at 28% 30%, rgba(110,80,255,.22), transparent 60%),
+             radial-gradient(34% 26% at 76% 66%, rgba(0,200,255,.18), transparent 60%);
+  filter:blur(6px); animation:nebpulse 16s ease-in-out infinite alternate;}
+.rs-layer{position:absolute; inset:0; background-repeat:repeat;}
+.rs1{background-image:radial-gradient(1.5px 1.5px at 20px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 120px 80px,#cfe3ff,transparent),radial-gradient(2px 2px at 200px 160px,#fff,transparent); background-size:240px 240px; animation:rs-fall1 5s linear infinite;}
+.rs2{background-image:radial-gradient(2px 2px at 60px 120px,#9ad8ff,transparent),radial-gradient(1.5px 1.5px at 180px 40px,#fff,transparent); background-size:320px 320px; opacity:.75; animation:rs-fall2 9s linear infinite;}
+.rs3{background-image:radial-gradient(1px 1px at 90px 200px,#fff,transparent),radial-gradient(1px 1px at 260px 110px,#ffd9ff,transparent); background-size:200px 200px; opacity:.55; animation:rs-fall3 14s linear infinite;}
+@keyframes rs-fall1{from{background-position:0 0} to{background-position:0 240px}}
+@keyframes rs-fall2{from{background-position:0 0} to{background-position:0 320px}}
+@keyframes rs-fall3{from{background-position:0 0} to{background-position:0 200px}}
+@media (prefers-reduced-motion: reduce){ .rs1,.rs2,.rs3,.rs-neb{animation:none;} }
+
 .run-progress{position:absolute; top:10px; left:0; right:0; display:flex; gap:8px; justify-content:center; z-index:5;
   padding-top:env(safe-area-inset-top);}
 .prog-dot{width:14px; height:14px; border-radius:50%; background:rgba(255,255,255,.18); border:1px solid var(--panel-line);}

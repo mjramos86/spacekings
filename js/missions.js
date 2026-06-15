@@ -14,6 +14,13 @@
   /* ---------------- shared run-screen helpers ---------------- */
   function showRun() { UI.showScreen("screen-run"); }
 
+  // 'space' = starfield (ship-vs-ship); 'ground' = corridor/surface grid
+  function setScene(mode) {
+    const sc = $("#run-scene");
+    if (mode === "space") sc.classList.add("space");
+    else sc.classList.remove("space");
+  }
+
   function setProgress(seq, idx) {
     $("#run-progress").innerHTML = seq.map((e, i) => {
       const cls = ["prog-dot"];
@@ -72,6 +79,7 @@
   function returnHub() {
     SK.state.mission = null;
     SK.Combat.stop();
+    setScene("ground");
     SK.Hub.refreshTop();
     UI.showScreen("screen-hub");
   }
@@ -127,6 +135,7 @@
       seq: [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }],
     };
     showRun();
+    setScene("ground");
     setProgress(M().seq, 0);
     travel(planetEncounter);
   }
@@ -190,6 +199,7 @@
     const save = S();
     SK.state.mission = { kind: "ship", opt, level: opt.level, phase: "space" };
     showRun();
+    setScene("space");
     setProgress([{ type: "boss" }], 0);
     const player = SK.makePlayerShip(save);
     const enemy = SK.makeEnemyShip({ level: opt.level, name: opt.shipName, icon: opt.icon });
@@ -243,6 +253,7 @@
     m.idx = 0;
     m.seq = [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }];
     UI.toast("Boarding " + m.opt.shipName + "…");
+    setScene("ground"); // boarding happens on-foot inside the ship's corridors
     setProgress(m.seq, 0);
     travel(boardEncounter);
   }
