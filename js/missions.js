@@ -18,9 +18,14 @@
   // first-person weapon, 'corridor' = grid (on-foot boarding / default)
   function setScene(mode) {
     const sc = $("#run-scene");
-    sc.classList.remove("space", "planet");
+    sc.classList.remove("space", "planet", "corridor");
     if (mode === "space") sc.classList.add("space");
     else if (mode === "planet") { sc.classList.add("planet"); ensureGun(); }
+    else if (mode === "corridor") { sc.classList.add("corridor"); ensureCorridor(); ensureGun(); }
+  }
+  function ensureCorridor() {
+    const el = $(".corridor-scene");
+    if (el && !el.firstChild) el.innerHTML = SK.UI.corridorSceneSVG();
   }
   function ensureGun() {
     $("#fp-gun").innerHTML =
@@ -87,7 +92,7 @@
   function returnHub() {
     SK.state.mission = null;
     SK.Combat.stop();
-    setScene("corridor");
+    setScene("none");
     SK.Hub.refreshTop();
     UI.showScreen("screen-hub");
   }

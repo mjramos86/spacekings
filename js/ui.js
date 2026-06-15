@@ -193,6 +193,64 @@
         `</svg>`
       );
     },
+
+    /* ---- ship interior corridor (on-foot boarding), one-point perspective ---- */
+    corridorSceneSVG() {
+      const Nl = 0, Nr = 1000, Nt = 0, Nb = 1100, Fl = 405, Fr = 595, Ft = 380, Fb = 610;
+      const L = (a, b, t) => a + (b - a) * t, f = (n) => n.toFixed(1), P = (x, y) => f(x) + "," + f(y);
+      let seams = "", floor = "", ceil = "";
+      [0.30, 0.55, 0.78].forEach((t) => {
+        const lx = L(Nl, Fl, t), rx = L(Nr, Fr, t), yb = L(Nb, Fb, t), yt = L(Nt, Ft, t);
+        seams += `<line x1="${f(lx)}" y1="${f(yt)}" x2="${f(lx)}" y2="${f(yb)}"/><line x1="${f(rx)}" y1="${f(yt)}" x2="${f(rx)}" y2="${f(yb)}"/>`;
+        const cy = L(Nt, Ft, t); ceil += `<line x1="${f(lx)}" y1="${f(cy)}" x2="${f(rx)}" y2="${f(cy)}"/>`;
+      });
+      [0.18, 0.38, 0.60, 0.82].forEach((t) => {
+        const lx = L(Nl, Fl, t), rx = L(Nr, Fr, t), y = L(Nb, Fb, t);
+        floor += `<line x1="${f(lx)}" y1="${f(y)}" x2="${f(rx)}" y2="${f(y)}"/>`;
+      });
+      const wallDoor = (side, t1, t2, hp) => {
+        const nx = side === "l" ? Nl : Nr, fx = side === "l" ? Fl : Fr;
+        const x1 = L(nx, fx, t1), x2 = L(nx, fx, t2), fb1 = L(Nb, Fb, t1), fb2 = L(Nb, Fb, t2), ft1 = L(Nt, Ft, t1), ft2 = L(Nt, Ft, t2);
+        const tp1 = fb1 - (fb1 - ft1) * hp, tp2 = fb2 - (fb2 - ft2) * hp, bt1 = fb1 - (fb1 - ft1) * 0.06, bt2 = fb2 - (fb2 - ft2) * 0.06;
+        return `<polygon points="${P(x1, bt1)} ${P(x2, bt2)} ${P(x2, tp2)} ${P(x1, tp1)}" fill="#101a32" stroke="#2a3a5a" stroke-width="2"/>` +
+          `<polygon points="${P(x1, bt1)} ${P(x2, bt2)} ${P(x2, tp2)} ${P(x1, tp1)}" fill="none" stroke="#37e6ff" stroke-width="2" opacity=".45"/>` +
+          `<rect x="${f(L(x1, x2, .4))}" y="${f(L(tp1, tp2, .4) + 18)}" width="${f((x2 - x1) * 0.2)}" height="14" rx="3" fill="#37e6ff" opacity=".55"/>`;
+      };
+      return (
+        `<svg class="corridor-bg" viewBox="0 0 1000 1100" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">` +
+        `<defs>` +
+        `<linearGradient id="co-ceil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1020"/><stop offset="100%" stop-color="#18213c"/></linearGradient>` +
+        `<linearGradient id="co-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e1628"/><stop offset="100%" stop-color="#202a42"/></linearGradient>` +
+        `<linearGradient id="co-wallL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#161e36"/><stop offset="100%" stop-color="#2a3552"/></linearGradient>` +
+        `<linearGradient id="co-wallR" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#161e36"/><stop offset="100%" stop-color="#2a3552"/></linearGradient>` +
+        `<radialGradient id="co-end" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#2a4a66"/><stop offset="100%" stop-color="#16243e"/></radialGradient>` +
+        `<radialGradient id="co-alarm" cx="50%" cy="0%" r="70%"><stop offset="0" stop-color="#ff3a3a" stop-opacity=".4"/><stop offset="100%" stop-color="#ff3a3a" stop-opacity="0"/></radialGradient>` +
+        `<radialGradient id="co-port" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#bff7ff"/><stop offset="60%" stop-color="#1f6e9e"/><stop offset="100%" stop-color="#06101f"/></radialGradient>` +
+        `<filter id="co-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>` +
+        `</defs>` +
+        `<polygon points="0,0 1000,0 ${P(Fr, Ft)} ${P(Fl, Ft)}" fill="url(#co-ceil)"/>` +
+        `<polygon points="0,1100 1000,1100 ${P(Fr, Fb)} ${P(Fl, Fb)}" fill="url(#co-floor)"/>` +
+        `<polygon points="0,0 ${P(Fl, Ft)} ${P(Fl, Fb)} 0,1100" fill="url(#co-wallL)"/>` +
+        `<polygon points="1000,0 ${P(Fr, Ft)} ${P(Fr, Fb)} 1000,1100" fill="url(#co-wallR)"/>` +
+        wallDoor("l", 0.28, 0.50, 0.64) + wallDoor("l", 0.60, 0.74, 0.6) + wallDoor("r", 0.28, 0.50, 0.64) + wallDoor("r", 0.60, 0.74, 0.6) +
+        `<g stroke="#33425f" stroke-width="2" opacity=".8" fill="none">${floor}</g>` +
+        `<g stroke="#2a3650" stroke-width="2" opacity=".7" fill="none">${ceil}${seams}</g>` +
+        `<g stroke="#37e6ff" stroke-width="3" opacity=".7" filter="url(#co-glow)" fill="none">` +
+          `<line x1="0" y1="0" x2="${f(Fl)}" y2="${f(Ft)}"/><line x1="1000" y1="0" x2="${f(Fr)}" y2="${f(Ft)}"/>` +
+          `<line x1="0" y1="1100" x2="${f(Fl)}" y2="${f(Fb)}"/><line x1="1000" y1="1100" x2="${f(Fr)}" y2="${f(Fb)}"/>` +
+        `</g>` +
+        `<polygon points="430,0 570,0 ${P(540, Ft)} ${P(460, Ft)}" fill="#0a1430"/>` +
+        `<line x1="500" y1="0" x2="500" y2="${f(Ft)}" stroke="#6fe0ff" stroke-width="6" filter="url(#co-glow)" opacity=".9"/>` +
+        `<rect x="${f(Fl)}" y="${f(Ft)}" width="${f(Fr - Fl)}" height="${f(Fb - Ft)}" fill="url(#co-end)" stroke="#46577e" stroke-width="4"/>` +
+        `<line x1="500" y1="${f(Ft)}" x2="500" y2="${f(Fb)}" stroke="#16243e" stroke-width="4"/>` +
+        `<rect x="465" y="${f(Ft + 34)}" width="70" height="46" rx="8" fill="url(#co-port)" stroke="#9fe9ff" stroke-width="2"/>` +
+        `<circle cx="482" cy="${f(Ft + 50)}" r="1.6" fill="#fff"/><circle cx="512" cy="${f(Ft + 60)}" r="1.4" fill="#cfe3ff"/><circle cx="520" cy="${f(Ft + 44)}" r="1.2" fill="#fff"/>` +
+        `<g fill="#ffd54a">` + [0, 1, 2, 3].map((i) => `<polygon points="${430 + i * 36},598 ${446 + i * 36},598 ${438 + i * 36},610 ${422 + i * 36},610"/>`).join("") + `</g>` +
+        `<rect width="1000" height="600" fill="url(#co-alarm)" class="cor-alarm"/>` +
+        `<circle cx="500" cy="${f(Ft - 14)}" r="11" fill="#ff4a4a" class="cor-alarm" filter="url(#co-glow)"/>` +
+        `</svg>`
+      );
+    },
   };
 
   SK.UI = UI;
