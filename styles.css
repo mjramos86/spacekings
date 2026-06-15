@@ -347,14 +347,22 @@ button,input{font-family:inherit;}
 /* first-person hands + blaster */
 .fp-gun{position:absolute; left:50%; bottom:-2%; width:min(94%,470px); transform:translateX(-50%); z-index:7; pointer-events:none; display:none;}
 .run-scene.planet .fp-gun{display:block;}
+.fp-gun-inner{position:relative; display:block; transform-origin:50% 100%; animation:fp-idle 2.6s ease-in-out infinite;}
+.fp-gun.running .fp-gun-inner{animation:fp-run .62s ease-in-out infinite;}
 .fp-gun svg{display:block; width:100%; height:auto; filter:drop-shadow(0 -3px 12px rgba(0,0,0,.45));}
+@keyframes fp-idle{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-4px) rotate(.5deg)}}
+@keyframes fp-run{0%{transform:translateY(0) rotate(-.9deg)}25%{transform:translateY(-11px) rotate(0deg)}50%{transform:translateY(0) rotate(.9deg)}75%{transform:translateY(-11px) rotate(0deg)}100%{transform:translateY(0) rotate(-.9deg)}}
 .fp-gun.fire{animation:fp-recoil .18s ease;}
 @keyframes fp-recoil{0%{transform:translateX(-50%) translateY(0)}40%{transform:translateX(-50%) translateY(12px)}100%{transform:translateX(-50%) translateY(0)}}
-.fp-laser{position:absolute; left:50%; bottom:82%; width:12px; height:0; transform:translateX(-50%);
+.fp-laser{position:absolute; left:50%; bottom:86%; width:12px; height:0; transform:translateX(-50%);
   background:linear-gradient(180deg, rgba(120,220,255,0), #aef0ff 35%, #37e6ff); border-radius:8px; opacity:0;
   box-shadow:0 0 18px #37e6ff, 0 0 6px #fff;}
 .fp-gun.fire .fp-laser{animation:fp-shoot .2s ease-out;}
 @keyframes fp-shoot{0%{opacity:0; height:0}25%{opacity:1; height:62vh}100%{opacity:0; height:62vh}}
+.fp-flash{position:absolute; left:50%; bottom:86%; width:64px; height:64px; transform:translate(-50%,50%) scale(0); border-radius:50%;
+  background:radial-gradient(circle,#fff 0%,#aef0ff 28%,rgba(55,230,255,.5) 52%,transparent 70%); opacity:0; pointer-events:none;}
+.fp-gun.fire .fp-flash{animation:fp-flash .22s ease-out;}
+@keyframes fp-flash{0%{opacity:0; transform:translate(-50%,50%) scale(.2)}30%{opacity:1; transform:translate(-50%,50%) scale(1)}100%{opacity:0; transform:translate(-50%,50%) scale(1.35)}}
 
 /* planet-mode combat HUD: hide the emoji weapon, lift the player bar to a top HUD */
 .run-scene.planet #combat-view .player-weapon{display:none;}
@@ -362,7 +370,7 @@ button,input{font-family:inherit;}
   background:linear-gradient(180deg, rgba(6,9,20,.85), rgba(6,9,20,0)); padding:calc(env(safe-area-inset-top) + 34px) 16px 16px;}
 .run-scene.planet #combat-view .enemy-area{padding-bottom:26%;}
 .run-scene.planet .run-progress{z-index:8;}
-@media (prefers-reduced-motion: reduce){ .ps-ufo,.ps-flora{animation:none;} }
+@media (prefers-reduced-motion: reduce){ .ps-ufo,.ps-flora,.fp-gun-inner,.fp-flash{animation:none;} }
 
 .run-progress{position:absolute; top:10px; left:0; right:0; display:flex; gap:8px; justify-content:center; z-index:5;
   padding-top:env(safe-area-inset-top);}

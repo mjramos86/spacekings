@@ -122,4 +122,19 @@
     eyes: ["#4a90d9", "#3aa655", "#7a4a2b", "#6b6b6b", "#b0432f", "#7d3ac1", "#e0a020", "#27c2c2"],
     hair: ["#1a1a1a", "#4a2f1b", "#8a5a2b", "#c9a227", "#b0b0b0", "#d94f70", "#3a6fd9", "#36c2c2", "#9b59b6"],
   };
+
+  /* ---------------- Planet surface palettes (one per biome) ---------------- */
+  // sky[4] (top→horizon), ground[3], path[2], pathEdge, pathLine, mountain,
+  // snow (or null), glow, cap[3], stem, spot, plant[2], horizonGlow
+  SK.PLANET_PALETTES = {
+    Jungle:   { sky:["#070a20","#0e1740","#1b2a63","#27619a"], ground:["#1c5a44","#123a30","#0b211c"], path:["#7fe9ff","#2a6f9e"], pathEdge:"#aef6ff", pathLine:"#0f3550", mountain:"#26365f", snow:"#cfe0ff", glow:"#b06bff", cap:["#c79bf2","#8a4fd0","#5a2f9a"], stem:"#d8c7e8", spot:"#ecdcff", plant:["#3aa66a","#2f8f5a"], horizonGlow:"#46c9e0" },
+    Volcanic: { sky:["#1a0808","#3a1208","#5a1e10","#a83a18"], ground:["#3a1410","#240b0a","#160706"], path:["#ffc46a","#a83a12"], pathEdge:"#ffe0a0", pathLine:"#5a1606", mountain:"#3a2018", snow:null,      glow:"#ff6a2a", cap:["#ffb27a","#e8501e","#9a2a0e"], stem:"#e8c8a8", spot:"#ffe4c0", plant:["#c8401a","#e8701a"], horizonGlow:"#ff7a3a" },
+    Frozen:   { sky:["#06122a","#0e2447","#1b3e6b","#3f78b0"], ground:["#7fa6c4","#4f7390","#2e4a66"], path:["#cfeeff","#6fb8e0"], pathEdge:"#ffffff", pathLine:"#2a4a66", mountain:"#4f6f99", snow:"#ffffff", glow:"#9fe0ff", cap:["#bfe9ff","#6fb8e8","#3a7ab0"], stem:"#dff4ff", spot:"#ffffff", plant:["#6fb8e0","#9fd0ee"], horizonGlow:"#9fe0ff" },
+    Desert:   { sky:["#10081e","#2a1430","#5a2e3a","#b86a44"], ground:["#c9a86a","#9a7a44","#6b522c"], path:["#e8c98a","#a8823a"], pathEdge:"#ffe9b0", pathLine:"#6b4a1a", mountain:"#8a6a44", snow:null,      glow:"#ffb24a", cap:["#ffba6a","#d8843a","#9a5a1e"], stem:"#e8d8b0", spot:"#ffe9c0", plant:["#6aa84a","#4a8a3a"], horizonGlow:"#ffb24a" },
+    Toxic:    { sky:["#0a1606","#16280a","#26401a","#5a7a2a"], ground:["#3a5a1e","#26400f","#16280a"], path:["#caff6a","#6a9a2a"], pathEdge:"#e8ffb0", pathLine:"#2a4a14", mountain:"#2a3a1a", snow:null,      glow:"#b6ff3a", cap:["#d6ff7a","#9ad83a","#5a8a1e"], stem:"#d8e8b0", spot:"#eaffc0", plant:["#6a9a2a","#9ad83a"], horizonGlow:"#b6ff3a" },
+    Crystal:  { sky:["#0a0620","#170a3a","#2a1466","#5a3aa8"], ground:["#2a1f4a","#1a1336","#100a22"], path:["#cfd0ff","#6a5ad0"], pathEdge:"#ffffff", pathLine:"#2a1f5a", mountain:"#3a2a66", snow:"#cfe0ff", glow:"#c46bff", cap:["#e0aaff","#a86bff","#6a3ad0"], stem:"#d8c7e8", spot:"#f0dcff", plant:["#7a3ac1","#37e6ff"], horizonGlow:"#b46bff" },
+    Oceanic:  { sky:["#04121e","#0a2638","#13466b","#2a7a9a"], ground:["#1c5a5a","#123a3e","#0b2124"], path:["#7fe9ff","#2a8f9e"], pathEdge:"#aef6ff", pathLine:"#0f3a44", mountain:"#2a5a66", snow:null,      glow:"#46e0d0", cap:["#9ff0e0","#46c0c8","#2a7a8a"], stem:"#cdeef0", spot:"#dffff8", plant:["#2a8f9e","#37a8ff"], horizonGlow:"#46c9e0" },
+    Barren:   { sky:["#08080e","#14141f","#26263a","#56607a"], ground:["#5a5a66","#3a3a44","#22222a"], path:["#aab0c0","#5a606e"], pathEdge:"#d8dde8", pathLine:"#2a2a36", mountain:"#4a4a5a", snow:"#cfd6e8", glow:"#7a9ac0", cap:["#aab8d0","#6a7a98","#3a4a66"], stem:"#cdd6e8", spot:"#e0e8f4", plant:["#5a6a88","#7a8aa8"], horizonGlow:"#8a9ab0" },
+  };
+  SK.PLANET_PALETTES.default = SK.PLANET_PALETTES.Jungle;
 })();

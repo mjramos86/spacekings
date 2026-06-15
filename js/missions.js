@@ -24,7 +24,8 @@
   }
   function ensureGun() {
     $("#fp-gun").innerHTML =
-      '<div id="fp-laser" class="fp-laser"></div>' + SK.UI.fpGunSVG(S().appearance && S().appearance.skin);
+      '<div class="fp-gun-inner"><div id="fp-laser" class="fp-laser"></div><div id="fp-flash" class="fp-flash"></div>' +
+      SK.UI.fpGunSVG(S().appearance && S().appearance.skin) + "</div>";
   }
 
   function setProgress(seq, idx) {
@@ -40,8 +41,9 @@
   function travel(cb) {
     const t = $("#run-travel");
     $("#combat-view").classList.remove("show");
+    const g = $("#fp-gun"); if (g) g.classList.add("running"); // bigger weapon bob while moving
     t.classList.add("show");
-    setTimeout(() => { t.classList.remove("show"); cb(); }, 1050);
+    setTimeout(() => { t.classList.remove("show"); if (g) g.classList.remove("running"); cb(); }, 1050);
   }
 
   function applyXP(amount) {
@@ -141,6 +143,7 @@
       seq: [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }],
     };
     showRun();
+    $(".planet-scene").innerHTML = SK.UI.planetSceneSVG(SK.PLANET_PALETTES[opt.biome.name] || SK.PLANET_PALETTES.default);
     setScene("planet");
     setProgress(M().seq, 0);
     travel(planetEncounter);

@@ -140,6 +140,59 @@
         `</g></svg>`
       );
     },
+
+    /* ---- planet surface scene, themed by biome palette ---- */
+    planetSceneSVG(pal) {
+      pal = pal || SK.PLANET_PALETTES.default;
+      const md = UI.shade(pal.mountain, -0.34);
+      const snow = pal.snow
+        ? `<polygon points="360,300 410,355 330,355" fill="${pal.snow}"/>` +
+          `<polygon points="240,330 285,378 200,378" fill="${pal.snow}" opacity=".85"/>` +
+          `<polygon points="850,330 895,382 805,382" fill="${pal.snow}" opacity=".9"/>`
+        : "";
+      const mush = (gx, gy, capRx, capRy, stemX, stemW, stemH, spots) =>
+        `<ellipse cx="${gx}" cy="${gy}" rx="${capRx * 1.45}" ry="${capRx * 1.45}" fill="url(#ps-mushGlow)"/>` +
+        `<rect x="${stemX}" y="${gy}" width="${stemW}" height="${stemH}" rx="${stemW / 2}" fill="${pal.stem}"/>` +
+        `<ellipse cx="${gx}" cy="${gy}" rx="${capRx}" ry="${capRy}" fill="url(#ps-mush)"/>` + spots;
+      return (
+        `<svg class="planet-bg" viewBox="0 0 1000 1100" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">` +
+        `<defs>` +
+        `<linearGradient id="ps-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal.sky[0]}"/><stop offset="40%" stop-color="${pal.sky[1]}"/><stop offset="70%" stop-color="${pal.sky[2]}"/><stop offset="100%" stop-color="${pal.sky[3]}"/></linearGradient>` +
+        `<linearGradient id="ps-ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal.ground[0]}"/><stop offset="55%" stop-color="${pal.ground[1]}"/><stop offset="100%" stop-color="${pal.ground[2]}"/></linearGradient>` +
+        `<linearGradient id="ps-path" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal.path[0]}"/><stop offset="100%" stop-color="${pal.path[1]}"/></linearGradient>` +
+        `<linearGradient id="ps-ufo" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff5db0"/><stop offset="35%" stop-color="#ffd54a"/><stop offset="65%" stop-color="#46e08a"/><stop offset="100%" stop-color="#37a8ff"/></linearGradient>` +
+        `<radialGradient id="ps-ufoGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#bff7ff" stop-opacity=".9"/><stop offset="100%" stop-color="#bff7ff" stop-opacity="0"/></radialGradient>` +
+        `<radialGradient id="ps-mush" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="${pal.cap[0]}"/><stop offset="60%" stop-color="${pal.cap[1]}"/><stop offset="100%" stop-color="${pal.cap[2]}"/></radialGradient>` +
+        `<radialGradient id="ps-mushGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="${pal.glow}" stop-opacity=".8"/><stop offset="100%" stop-color="${pal.glow}" stop-opacity="0"/></radialGradient>` +
+        `<radialGradient id="ps-horizon" cx="50%" cy="100%" r="60%"><stop offset="0" stop-color="${pal.horizonGlow}" stop-opacity=".55"/><stop offset="100%" stop-color="${pal.horizonGlow}" stop-opacity="0"/></radialGradient>` +
+        `</defs>` +
+        `<rect width="1000" height="560" fill="url(#ps-sky)"/>` +
+        `<ellipse cx="500" cy="500" rx="600" ry="120" fill="url(#ps-horizon)"/>` +
+        `<g fill="#fff"><circle cx="120" cy="70" r="2.5"/><circle cx="240" cy="140" r="1.6"/><circle cx="360" cy="60" r="2"/><circle cx="520" cy="110" r="1.5"/><circle cx="180" cy="220" r="1.8"/><circle cx="300" cy="280" r="1.4"/><circle cx="60" cy="320" r="1.6"/><circle cx="640" cy="80" r="1.7"/><circle cx="880" cy="300" r="2"/><circle cx="820" cy="150" r="1.5"/><circle cx="940" cy="90" r="1.8"/><circle cx="440" cy="200" r="1.4"/><circle cx="700" cy="250" r="1.5"/><circle cx="980" cy="220" r="1.6"/><circle cx="40" cy="140" r="1.5"/></g>` +
+        `<g class="ps-ufo"><ellipse cx="760" cy="180" rx="170" ry="90" fill="url(#ps-ufoGlow)"/><ellipse cx="760" cy="190" rx="130" ry="30" fill="url(#ps-ufo)" stroke="#bff7ff" stroke-width="3"/><ellipse cx="760" cy="172" rx="62" ry="34" fill="#0e2036" stroke="#9fe9ff" stroke-width="3"/><ellipse cx="760" cy="166" rx="46" ry="20" fill="#37a8ff" opacity=".7"/><ellipse cx="760" cy="205" rx="150" ry="12" fill="url(#ps-ufo)" opacity=".5"/></g>` +
+        `<polygon points="-20,520 120,330 240,440 360,300 470,440 560,360 700,470 850,330 1020,500 1020,560 -20,560" fill="${pal.mountain}"/>` + snow +
+        `<polygon points="-20,560 200,470 420,560 -20,560" fill="${md}" opacity=".7"/>` +
+        `<polygon points="1020,560 760,470 560,560 1020,560" fill="${md}" opacity=".7"/>` +
+        `<rect y="520" width="1000" height="580" fill="url(#ps-ground)"/>` +
+        `<polygon points="468,520 532,520 760,1100 240,1100" fill="url(#ps-path)" opacity=".92"/>` +
+        `<polygon points="468,520 532,520 760,1100 240,1100" fill="none" stroke="${pal.pathEdge}" stroke-width="4" opacity=".8"/>` +
+        `<g stroke="${pal.pathLine}" stroke-width="3" opacity=".55" fill="none"><path d="M470,560 L530,560"/><path d="M458,620 L542,620"/><path d="M442,700 L558,700"/><path d="M420,800 L580,800"/><path d="M392,920 L608,920"/><path d="M360,1060 L640,1060"/></g>` +
+        `<path d="M500,520 L500,1100" stroke="${pal.pathEdge}" stroke-width="2" opacity=".5" fill="none"/>` +
+        `<g class="ps-flora"><path d="M120,1000 q-30,-120 10,-220" stroke="${pal.plant[0]}" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M150,1000 q10,-140 -30,-240" stroke="${pal.plant[1]}" stroke-width="8" fill="none" stroke-linecap="round"/>` +
+          mush(118, 690, 86, 46, 104, 26, 120,
+            `<circle cx="95" cy="678" r="9" fill="${pal.spot}"/><circle cx="140" cy="690" r="7" fill="${pal.spot}"/><circle cx="118" cy="668" r="6" fill="${pal.spot}"/>`) + `</g>` +
+        `<g class="ps-flora">` +
+          mush(70, 900, 64, 34, 58, 22, 100,
+            `<circle cx="50" cy="892" r="7" fill="${pal.spot}"/><circle cx="86" cy="902" r="6" fill="${pal.spot}"/>`) + `</g>` +
+        `<g class="ps-flora"><path d="M900,1010 q40,-130 -6,-240" stroke="${pal.plant[0]}" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M928,1010 q20,-150 -40,-250" stroke="${pal.plant[1]}" stroke-width="7" fill="none" stroke-linecap="round"/>` +
+          mush(905, 700, 90, 48, 892, 26, 120,
+            `<circle cx="880" cy="688" r="9" fill="${pal.spot}"/><circle cx="928" cy="700" r="7" fill="${pal.spot}"/><circle cx="906" cy="678" r="6" fill="${pal.spot}"/>`) + `</g>` +
+        `<g class="ps-flora">` +
+          mush(950, 910, 66, 34, 938, 22, 100,
+            `<circle cx="930" cy="902" r="7" fill="${pal.spot}"/><circle cx="966" cy="912" r="6" fill="${pal.spot}"/>`) + `</g>` +
+        `</svg>`
+      );
+    },
   };
 
   SK.UI = UI;
