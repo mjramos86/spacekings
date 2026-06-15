@@ -14,11 +14,17 @@
   /* ---------------- shared run-screen helpers ---------------- */
   function showRun() { UI.showScreen("screen-run"); }
 
-  // 'space' = starfield (ship-vs-ship); 'ground' = corridor/surface grid
+  // scene modes: 'space' = starfield (ship-vs-ship), 'planet' = alien surface +
+  // first-person weapon, 'corridor' = grid (on-foot boarding / default)
   function setScene(mode) {
     const sc = $("#run-scene");
+    sc.classList.remove("space", "planet");
     if (mode === "space") sc.classList.add("space");
-    else sc.classList.remove("space");
+    else if (mode === "planet") { sc.classList.add("planet"); ensureGun(); }
+  }
+  function ensureGun() {
+    $("#fp-gun").innerHTML =
+      '<div id="fp-laser" class="fp-laser"></div>' + SK.UI.fpGunSVG(S().appearance && S().appearance.skin);
   }
 
   function setProgress(seq, idx) {
@@ -79,7 +85,7 @@
   function returnHub() {
     SK.state.mission = null;
     SK.Combat.stop();
-    setScene("ground");
+    setScene("corridor");
     SK.Hub.refreshTop();
     UI.showScreen("screen-hub");
   }
@@ -135,7 +141,7 @@
       seq: [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }],
     };
     showRun();
-    setScene("ground");
+    setScene("planet");
     setProgress(M().seq, 0);
     travel(planetEncounter);
   }
@@ -253,7 +259,7 @@
     m.idx = 0;
     m.seq = [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }];
     UI.toast("Boarding " + m.opt.shipName + "…");
-    setScene("ground"); // boarding happens on-foot inside the ship's corridors
+    setScene("corridor"); // boarding happens on-foot inside the ship's corridors
     setProgress(m.seq, 0);
     travel(boardEncounter);
   }

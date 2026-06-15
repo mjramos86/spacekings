@@ -260,6 +260,77 @@
           <div class="rs-layer rs2"></div>
           <div class="rs-layer rs3"></div>
         </div>
+
+        <!-- planet surface environment (planet exploration) -->
+        <div class="planet-scene" aria-hidden="true">
+          <svg class="planet-bg" viewBox="0 0 1000 1100" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="ps-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070a20"/><stop offset="40%" stop-color="#0e1740"/><stop offset="70%" stop-color="#1b2a63"/><stop offset="100%" stop-color="#27619a"/></linearGradient>
+              <linearGradient id="ps-ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c5a44"/><stop offset="55%" stop-color="#123a30"/><stop offset="100%" stop-color="#0b211c"/></linearGradient>
+              <linearGradient id="ps-path" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fe9ff"/><stop offset="100%" stop-color="#2a6f9e"/></linearGradient>
+              <linearGradient id="ps-ufo" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff5db0"/><stop offset="35%" stop-color="#ffd54a"/><stop offset="65%" stop-color="#46e08a"/><stop offset="100%" stop-color="#37a8ff"/></linearGradient>
+              <radialGradient id="ps-ufoGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#bff7ff" stop-opacity=".9"/><stop offset="100%" stop-color="#bff7ff" stop-opacity="0"/></radialGradient>
+              <radialGradient id="ps-mush" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#c79bf2"/><stop offset="60%" stop-color="#8a4fd0"/><stop offset="100%" stop-color="#5a2f9a"/></radialGradient>
+              <radialGradient id="ps-mushGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#b06bff" stop-opacity=".8"/><stop offset="100%" stop-color="#b06bff" stop-opacity="0"/></radialGradient>
+              <radialGradient id="ps-horizon" cx="50%" cy="100%" r="60%"><stop offset="0" stop-color="#46c9e0" stop-opacity=".55"/><stop offset="100%" stop-color="#46c9e0" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="1000" height="560" fill="url(#ps-sky)"/>
+            <ellipse cx="500" cy="500" rx="600" ry="120" fill="url(#ps-horizon)"/>
+            <g fill="#fff">
+              <circle cx="120" cy="70" r="2.5"/><circle cx="240" cy="140" r="1.6"/><circle cx="360" cy="60" r="2"/><circle cx="520" cy="110" r="1.5"/>
+              <circle cx="180" cy="220" r="1.8"/><circle cx="300" cy="280" r="1.4"/><circle cx="60" cy="320" r="1.6"/><circle cx="640" cy="80" r="1.7"/>
+              <circle cx="880" cy="300" r="2"/><circle cx="820" cy="150" r="1.5"/><circle cx="940" cy="90" r="1.8"/><circle cx="440" cy="200" r="1.4"/>
+              <circle cx="700" cy="250" r="1.5"/><circle cx="980" cy="220" r="1.6"/><circle cx="40" cy="140" r="1.5"/>
+            </g>
+            <g class="ps-ufo">
+              <ellipse cx="760" cy="180" rx="170" ry="90" fill="url(#ps-ufoGlow)"/>
+              <ellipse cx="760" cy="190" rx="130" ry="30" fill="url(#ps-ufo)" stroke="#bff7ff" stroke-width="3"/>
+              <ellipse cx="760" cy="172" rx="62" ry="34" fill="#0e2036" stroke="#9fe9ff" stroke-width="3"/>
+              <ellipse cx="760" cy="166" rx="46" ry="20" fill="#37a8ff" opacity=".7"/>
+              <ellipse cx="760" cy="205" rx="150" ry="12" fill="url(#ps-ufo)" opacity=".5"/>
+            </g>
+            <polygon points="-20,520 120,330 240,440 360,300 470,440 560,360 700,470 850,330 1020,500 1020,560 -20,560" fill="#26365f"/>
+            <polygon points="360,300 410,355 330,355" fill="#cfe0ff"/><polygon points="240,330 285,378 200,378" fill="#cfe0ff" opacity=".85"/>
+            <polygon points="850,330 895,382 805,382" fill="#cfe0ff" opacity=".9"/>
+            <polygon points="-20,560 200,470 420,560 -20,560" fill="#1c2a4d" opacity=".7"/>
+            <polygon points="1020,560 760,470 560,560 1020,560" fill="#1c2a4d" opacity=".7"/>
+            <rect y="520" width="1000" height="580" fill="url(#ps-ground)"/>
+            <polygon points="468,520 532,520 760,1100 240,1100" fill="url(#ps-path)" opacity=".92"/>
+            <polygon points="468,520 532,520 760,1100 240,1100" fill="none" stroke="#aef6ff" stroke-width="4" opacity=".8"/>
+            <g stroke="#0f3550" stroke-width="3" opacity=".55" fill="none">
+              <path d="M470,560 L530,560"/><path d="M458,620 L542,620"/><path d="M442,700 L558,700"/><path d="M420,800 L580,800"/><path d="M392,920 L608,920"/><path d="M360,1060 L640,1060"/>
+            </g>
+            <path d="M500,520 L500,1100" stroke="#dffaff" stroke-width="2" opacity=".5" fill="none"/>
+            <g class="ps-flora">
+              <path d="M120,1000 q-30,-120 10,-220" stroke="#3aa66a" stroke-width="10" fill="none" stroke-linecap="round"/>
+              <path d="M150,1000 q10,-140 -30,-240" stroke="#2f8f5a" stroke-width="8" fill="none" stroke-linecap="round"/>
+              <ellipse cx="120" cy="690" rx="130" ry="130" fill="url(#ps-mushGlow)"/>
+              <rect x="104" y="690" width="26" height="120" rx="12" fill="#d8c7e8"/>
+              <ellipse cx="117" cy="690" rx="86" ry="46" fill="url(#ps-mush)"/>
+              <circle cx="95" cy="678" r="9" fill="#ecdcff"/><circle cx="140" cy="690" r="7" fill="#ecdcff"/><circle cx="118" cy="668" r="6" fill="#ecdcff"/>
+            </g>
+            <g class="ps-flora">
+              <ellipse cx="70" cy="900" rx="90" ry="90" fill="url(#ps-mushGlow)"/>
+              <rect x="58" y="900" width="22" height="100" rx="10" fill="#d8c7e8"/>
+              <ellipse cx="69" cy="900" rx="64" ry="34" fill="url(#ps-mush)"/>
+              <circle cx="50" cy="892" r="7" fill="#ecdcff"/><circle cx="86" cy="902" r="6" fill="#ecdcff"/>
+            </g>
+            <g class="ps-flora">
+              <path d="M900,1010 q40,-130 -6,-240" stroke="#7a3ac1" stroke-width="10" fill="none" stroke-linecap="round"/>
+              <path d="M928,1010 q20,-150 -40,-250" stroke="#9a4fd0" stroke-width="7" fill="none" stroke-linecap="round"/>
+              <ellipse cx="905" cy="700" rx="135" ry="135" fill="url(#ps-mushGlow)"/>
+              <rect x="892" y="700" width="26" height="120" rx="12" fill="#d8c7e8"/>
+              <ellipse cx="905" cy="700" rx="90" ry="48" fill="url(#ps-mush)"/>
+              <circle cx="880" cy="688" r="9" fill="#ecdcff"/><circle cx="928" cy="700" r="7" fill="#ecdcff"/><circle cx="906" cy="678" r="6" fill="#ecdcff"/>
+            </g>
+            <g class="ps-flora">
+              <ellipse cx="950" cy="910" rx="95" ry="95" fill="url(#ps-mushGlow)"/>
+              <rect x="938" y="910" width="22" height="100" rx="10" fill="#d8c7e8"/>
+              <ellipse cx="949" cy="910" rx="66" ry="34" fill="url(#ps-mush)"/>
+              <circle cx="930" cy="902" r="7" fill="#ecdcff"/><circle cx="966" cy="912" r="6" fill="#ecdcff"/>
+            </g>
+          </svg>
+        </div>
         <div class="run-floor"></div>
         <div class="run-ceiling"></div>
         <div id="run-progress" class="run-progress"></div>
@@ -271,6 +342,9 @@
 
         <!-- combat view injected here -->
         <div id="combat-view" class="combat-view"></div>
+
+        <!-- first-person weapon (planet surface), filled by JS with the captain's skin tone -->
+        <div id="fp-gun" class="fp-gun" aria-hidden="true"><div id="fp-laser" class="fp-laser"></div></div>
       </div>
       <div id="run-foot" class="run-foot"></div>
     </section>

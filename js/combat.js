@@ -124,6 +124,11 @@
       if (side === "player") {
         const w = $("#cb-weapon"); if (w) { w.classList.remove("attack"); void w.offsetWidth; w.classList.add("attack"); }
         const e = $("#cb-enemy"); if (e) { e.classList.remove("hit"); void e.offsetWidth; e.classList.add("hit"); }
+        const sc = document.getElementById("run-scene"); // planet mode: fire the first-person blaster
+        if (sc && sc.classList.contains("planet")) {
+          const fg = document.getElementById("fp-gun");
+          if (fg) { fg.classList.remove("fire"); void fg.offsetWidth; fg.classList.add("fire"); }
+        }
       } else {
         const view = $("#combat-view"); if (view) { view.classList.remove("shake"); void view.offsetWidth; view.classList.add("shake"); }
       }

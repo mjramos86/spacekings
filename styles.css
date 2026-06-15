@@ -333,6 +333,37 @@ button,input{font-family:inherit;}
 @keyframes rs-fall3{from{background-position:0 0} to{background-position:0 200px}}
 @media (prefers-reduced-motion: reduce){ .rs1,.rs2,.rs3,.rs-neb{animation:none;} }
 
+/* planet mode (planet exploration): alien surface + first-person weapon */
+.planet-scene{position:absolute; inset:0; overflow:hidden; display:none; z-index:0;}
+.run-scene.planet .planet-scene{display:block;}
+.run-scene.planet .run-floor,.run-scene.planet .run-ceiling{display:none;}
+.planet-bg{width:100%; height:100%; display:block;}
+.ps-ufo{transform-box:fill-box; transform-origin:center; animation:ps-ufo 7s ease-in-out infinite;}
+@keyframes ps-ufo{0%,100%{transform:translate(0,0)}50%{transform:translate(-14px,-10px)}}
+.ps-flora{transform-box:fill-box; transform-origin:bottom center; animation:ps-sway 5s ease-in-out infinite;}
+.ps-flora:nth-of-type(3){animation-delay:.8s;} .ps-flora:nth-of-type(5){animation-delay:1.4s;}
+@keyframes ps-sway{0%,100%{transform:rotate(0deg)}50%{transform:rotate(1.6deg)}}
+
+/* first-person hands + blaster */
+.fp-gun{position:absolute; left:50%; bottom:-2%; width:min(94%,470px); transform:translateX(-50%); z-index:7; pointer-events:none; display:none;}
+.run-scene.planet .fp-gun{display:block;}
+.fp-gun svg{display:block; width:100%; height:auto; filter:drop-shadow(0 -3px 12px rgba(0,0,0,.45));}
+.fp-gun.fire{animation:fp-recoil .18s ease;}
+@keyframes fp-recoil{0%{transform:translateX(-50%) translateY(0)}40%{transform:translateX(-50%) translateY(12px)}100%{transform:translateX(-50%) translateY(0)}}
+.fp-laser{position:absolute; left:50%; bottom:82%; width:12px; height:0; transform:translateX(-50%);
+  background:linear-gradient(180deg, rgba(120,220,255,0), #aef0ff 35%, #37e6ff); border-radius:8px; opacity:0;
+  box-shadow:0 0 18px #37e6ff, 0 0 6px #fff;}
+.fp-gun.fire .fp-laser{animation:fp-shoot .2s ease-out;}
+@keyframes fp-shoot{0%{opacity:0; height:0}25%{opacity:1; height:62vh}100%{opacity:0; height:62vh}}
+
+/* planet-mode combat HUD: hide the emoji weapon, lift the player bar to a top HUD */
+.run-scene.planet #combat-view .player-weapon{display:none;}
+.run-scene.planet #combat-view .player-area{position:absolute; left:0; right:0; top:0; bottom:auto;
+  background:linear-gradient(180deg, rgba(6,9,20,.85), rgba(6,9,20,0)); padding:calc(env(safe-area-inset-top) + 34px) 16px 16px;}
+.run-scene.planet #combat-view .enemy-area{padding-bottom:26%;}
+.run-scene.planet .run-progress{z-index:8;}
+@media (prefers-reduced-motion: reduce){ .ps-ufo,.ps-flora{animation:none;} }
+
 .run-progress{position:absolute; top:10px; left:0; right:0; display:flex; gap:8px; justify-content:center; z-index:5;
   padding-top:env(safe-area-inset-top);}
 .prog-dot{width:14px; height:14px; border-radius:50%; background:rgba(255,255,255,.18); border:1px solid var(--panel-line);}
