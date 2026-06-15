@@ -123,9 +123,9 @@
   }
 
   function wireNav() {
-    document.querySelectorAll(".hub-card[data-action]").forEach((b) => {
-      b.addEventListener("click", () => {
-        switch (b.dataset.action) {
+    document.querySelectorAll("[data-action]").forEach((b) => {
+      const go = () => {
+        switch (b.getAttribute("data-action")) {
           case "mission-planet": SK.Mission.startPlanet(); break;
           case "mission-ship": SK.Mission.startShip(); break;
           case "character": SK.Hub.openCharacter(); break;
@@ -133,6 +133,10 @@
           case "robots": SK.Hub.openRobots(); break;
           case "shop": SK.Hub.openShop(); break;
         }
+      };
+      b.addEventListener("click", go);
+      b.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
       });
     });
 

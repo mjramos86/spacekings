@@ -90,27 +90,143 @@
         </div>
       </header>
 
-      <div class="hub-body">
-        <h3 class="section-title">Missions</h3>
-        <div class="hub-grid missions">
-          <button class="hub-card mission planet" data-action="mission-planet">
-            <div class="hub-card-icon">🪐</div>
-            <div class="hub-card-title">Planet Exploration</div>
-            <div class="hub-card-sub">Run the surface • fight • loot</div>
-          </button>
-          <button class="hub-card mission ship" data-action="mission-ship">
-            <div class="hub-card-icon">🛸</div>
-            <div class="hub-card-title">Ship Battle</div>
-            <div class="hub-card-sub">Duel pirates • destroy or board</div>
-          </button>
-        </div>
+      <div class="hub-body station-body">
+        <div class="station-caption">Welcome aboard, Captain — choose your destination</div>
+        <div class="station-wrap">
+          <svg class="station-svg" viewBox="0 0 1000 1160" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Station menu">
+            <defs>
+              <radialGradient id="st-sun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd27a" stop-opacity=".45"/><stop offset="100%" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+              <radialGradient id="st-planet" cx="35%" cy="32%" r="80%"><stop offset="0" stop-color="#5fe0d2"/><stop offset="45%" stop-color="#2a7bd6"/><stop offset="100%" stop-color="#0c1838"/></radialGradient>
+              <radialGradient id="st-reactor" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#d9fbff"/><stop offset="40%" stop-color="#37e6ff"/><stop offset="100%" stop-color="#0a3a5a"/></radialGradient>
+              <linearGradient id="st-core" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#28335f"/><stop offset="1" stop-color="#141b3a"/></linearGradient>
+              <linearGradient id="st-metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#33406f"/><stop offset="1" stop-color="#1a2348"/></linearGradient>
+              <linearGradient id="st-panelg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1c2a58"/><stop offset="1" stop-color="#0e1838"/></linearGradient>
+              <linearGradient id="st-flame" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="35%" stop-color="#37e6ff"/><stop offset="100%" stop-color="#37e6ff" stop-opacity="0"/></linearGradient>
+              <filter id="st-soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="6"/></filter>
+            </defs>
 
-        <h3 class="section-title">Station</h3>
-        <div class="hub-grid station">
-          <button class="hub-card" data-action="character"><div class="hub-card-icon">🧑‍🚀</div><div class="hub-card-title">Captain</div></button>
-          <button class="hub-card" data-action="ship"><div class="hub-card-icon">🚀</div><div class="hub-card-title">Ship Bay</div></button>
-          <button class="hub-card" data-action="robots"><div class="hub-card-icon">🤖</div><div class="hub-card-title">Robotics</div></button>
-          <button class="hub-card" data-action="shop"><div class="hub-card-icon">🛒</div><div class="hub-card-title">Shop</div></button>
+            <!-- backdrop -->
+            <circle cx="828" cy="170" r="150" fill="url(#st-sun)"/>
+            <g>
+              <circle cx="155" cy="980" r="175" fill="url(#st-planet)"/>
+              <ellipse cx="155" cy="980" rx="300" ry="58" fill="none" stroke="#6fa8ff" stroke-width="4" opacity=".6" transform="rotate(-18 155 980)"/>
+            </g>
+
+            <!-- solar arrays -->
+            <g class="st-panels" fill="url(#st-panelg)" stroke="#3a4a85" stroke-width="3">
+              <rect x="408" y="300" width="74" height="175" rx="6"/><rect x="518" y="300" width="74" height="175" rx="6"/>
+              <rect x="408" y="700" width="74" height="155" rx="6"/><rect x="518" y="700" width="74" height="155" rx="6"/>
+            </g>
+            <g stroke="#2b3a6a" stroke-width="2" opacity=".85">
+              <line x1="408" y1="345" x2="482" y2="345"/><line x1="408" y1="388" x2="482" y2="388"/><line x1="408" y1="431" x2="482" y2="431"/><line x1="445" y1="300" x2="445" y2="475"/>
+              <line x1="518" y1="345" x2="592" y2="345"/><line x1="518" y1="388" x2="592" y2="388"/><line x1="518" y1="431" x2="592" y2="431"/><line x1="555" y1="300" x2="555" y2="475"/>
+              <line x1="408" y1="745" x2="482" y2="745"/><line x1="408" y1="795" x2="482" y2="795"/><line x1="445" y1="700" x2="445" y2="855"/>
+              <line x1="518" y1="745" x2="592" y2="745"/><line x1="518" y1="795" x2="592" y2="795"/><line x1="555" y1="700" x2="555" y2="855"/>
+            </g>
+
+            <!-- structural spine + connector struts -->
+            <g fill="url(#st-metal)" stroke="#3a4a85" stroke-width="2">
+              <rect x="484" y="150" width="32" height="850" rx="8"/>
+              <rect x="350" y="189" width="140" height="22" rx="6"/><rect x="510" y="189" width="140" height="22" rx="6"/>
+              <rect x="345" y="564" width="58" height="22" rx="6"/><rect x="597" y="564" width="58" height="22" rx="6"/>
+              <rect x="350" y="939" width="140" height="22" rx="6"/><rect x="510" y="939" width="140" height="22" rx="6"/>
+            </g>
+
+            <!-- rotating habitat ring -->
+            <g class="hab-ring">
+              <circle cx="500" cy="575" r="150" fill="none" stroke="#37e6ff" stroke-width="3" opacity=".3"/>
+              <rect x="488" y="415" width="24" height="20" rx="5" fill="#2f3e72" stroke="#37e6ff" stroke-width="2"/>
+              <rect x="358" y="640" width="24" height="20" rx="5" fill="#2f3e72" stroke="#37e6ff" stroke-width="2"/>
+              <rect x="618" y="640" width="24" height="20" rx="5" fill="#2f3e72" stroke="#37e6ff" stroke-width="2"/>
+            </g>
+
+            <!-- reactor core -->
+            <g>
+              <circle cx="500" cy="575" r="112" fill="url(#st-core)" stroke="#3a4a85" stroke-width="4"/>
+              <circle cx="500" cy="575" r="72" fill="#0e1838" stroke="#274a86" stroke-width="3"/>
+              <circle class="reactor" cx="500" cy="575" r="46" fill="url(#st-reactor)" filter="url(#st-soft)"/>
+              <circle cx="500" cy="575" r="40" fill="url(#st-reactor)"/>
+              <g fill="#37e6ff" opacity=".5">
+                <circle class="nav-light" cx="592" cy="575" r="7"/><circle class="nav-light" cx="546" cy="495" r="7"/><circle class="nav-light" cx="454" cy="495" r="7"/>
+                <circle class="nav-light" cx="408" cy="575" r="7"/><circle class="nav-light" cx="454" cy="655" r="7"/><circle class="nav-light" cx="546" cy="655" r="7"/>
+              </g>
+            </g>
+
+            <!-- command bridge (decorative) -->
+            <g>
+              <line x1="500" y1="118" x2="500" y2="80" stroke="#3a4a85" stroke-width="4"/>
+              <circle class="nav-light" cx="500" cy="76" r="6" fill="#ff5d6c"/>
+              <rect x="455" y="116" width="90" height="64" rx="20" fill="url(#st-metal)" stroke="#3a4a85" stroke-width="3"/>
+              <rect x="471" y="132" width="58" height="22" rx="9" fill="#0a1228" stroke="#37e6ff" stroke-width="2"/>
+              <text class="st-tag" x="500" y="104">COMMAND</text>
+            </g>
+
+            <!-- engines (decorative) -->
+            <g>
+              <rect x="440" y="984" width="120" height="40" rx="10" fill="url(#st-metal)" stroke="#3a4a85" stroke-width="3"/>
+              <rect x="455" y="1020" width="28" height="44" rx="6" fill="#1a2348" stroke="#3a4a85" stroke-width="2"/>
+              <rect x="517" y="1020" width="28" height="44" rx="6" fill="#1a2348" stroke="#3a4a85" stroke-width="2"/>
+              <polygon class="st-flame" points="455,1063 483,1063 469,1130" fill="url(#st-flame)"/>
+              <polygon class="st-flame" points="517,1063 545,1063 531,1130" fill="url(#st-flame)"/>
+            </g>
+
+            <!-- drifting satellite -->
+            <g class="st-drift">
+              <rect x="876" y="62" width="14" height="12" fill="url(#st-panelg)" stroke="#3a4a85" stroke-width="2"/>
+              <rect x="930" y="62" width="14" height="12" fill="url(#st-panelg)" stroke="#3a4a85" stroke-width="2"/>
+              <rect x="892" y="58" width="36" height="20" rx="4" fill="url(#st-metal)" stroke="#3a4a85" stroke-width="2"/>
+            </g>
+
+            <!-- ===== MODULE PODS (clickable) ===== -->
+            <g class="station-pod pod-mission" style="color:#46e08a" data-action="mission-planet" tabindex="0" role="button" aria-label="Planet Exploration">
+              <rect class="pod-body" x="50" y="110" width="300" height="180" rx="24"/>
+              <rect class="pod-screen" x="72" y="130" width="256" height="84" rx="12"/>
+              <text class="pod-icon" x="200" y="172">🪐</text>
+              <text class="pod-label" x="200" y="250">Planet</text>
+              <text class="pod-sub" x="200" y="278">Exploration</text>
+              <circle class="nav-light" cx="66" cy="126" r="5" fill="currentColor"/><circle class="nav-light" cx="334" cy="126" r="5" fill="currentColor"/>
+            </g>
+            <g class="station-pod pod-mission" style="color:#b46bff" data-action="mission-ship" tabindex="0" role="button" aria-label="Ship Battle">
+              <rect class="pod-body" x="650" y="110" width="300" height="180" rx="24"/>
+              <rect class="pod-screen" x="672" y="130" width="256" height="84" rx="12"/>
+              <text class="pod-icon" x="800" y="172">🛸</text>
+              <text class="pod-label" x="800" y="250">Ship</text>
+              <text class="pod-sub" x="800" y="278">Battle</text>
+              <circle class="nav-light" cx="666" cy="126" r="5" fill="currentColor"/><circle class="nav-light" cx="934" cy="126" r="5" fill="currentColor"/>
+            </g>
+            <g class="station-pod" style="color:#37e6ff" data-action="character" tabindex="0" role="button" aria-label="Captain">
+              <rect class="pod-body" x="50" y="485" width="300" height="180" rx="24"/>
+              <rect class="pod-screen" x="72" y="505" width="256" height="84" rx="12"/>
+              <text class="pod-icon" x="200" y="547">🧑‍🚀</text>
+              <text class="pod-label" x="200" y="625">Captain</text>
+              <text class="pod-sub" x="200" y="653">Stats &amp; gear</text>
+              <circle class="nav-light" cx="66" cy="501" r="5" fill="currentColor"/><circle class="nav-light" cx="334" cy="501" r="5" fill="currentColor"/>
+            </g>
+            <g class="station-pod" style="color:#5ad1ff" data-action="ship" tabindex="0" role="button" aria-label="Ship Bay">
+              <rect class="pod-body" x="650" y="485" width="300" height="180" rx="24"/>
+              <rect class="pod-screen" x="672" y="505" width="256" height="84" rx="12"/>
+              <text class="pod-icon" x="800" y="547">🚀</text>
+              <text class="pod-label" x="800" y="625">Ship Bay</text>
+              <text class="pod-sub" x="800" y="653">Upgrade ship</text>
+              <circle class="nav-light" cx="666" cy="501" r="5" fill="currentColor"/><circle class="nav-light" cx="934" cy="501" r="5" fill="currentColor"/>
+            </g>
+            <g class="station-pod" style="color:#ffb24b" data-action="robots" tabindex="0" role="button" aria-label="Robotics">
+              <rect class="pod-body" x="50" y="860" width="300" height="180" rx="24"/>
+              <rect class="pod-screen" x="72" y="880" width="256" height="84" rx="12"/>
+              <text class="pod-icon" x="200" y="922">🤖</text>
+              <text class="pod-label" x="200" y="1000">Robotics</text>
+              <text class="pod-sub" x="200" y="1028">Robot team</text>
+              <circle class="nav-light" cx="66" cy="876" r="5" fill="currentColor"/><circle class="nav-light" cx="334" cy="876" r="5" fill="currentColor"/>
+            </g>
+            <g class="station-pod" style="color:#ffd54a" data-action="shop" tabindex="0" role="button" aria-label="Shop">
+              <rect class="pod-body" x="650" y="860" width="300" height="180" rx="24"/>
+              <rect class="pod-screen" x="672" y="880" width="256" height="84" rx="12"/>
+              <text class="pod-icon" x="800" y="922">🛒</text>
+              <text class="pod-label" x="800" y="1000">Shop</text>
+              <text class="pod-sub" x="800" y="1028">Buy &amp; sell</text>
+              <circle class="nav-light" cx="666" cy="876" r="5" fill="currentColor"/><circle class="nav-light" cx="934" cy="876" r="5" fill="currentColor"/>
+            </g>
+          </svg>
         </div>
       </div>
     </section>

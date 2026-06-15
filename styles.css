@@ -180,6 +180,41 @@ button,input{font-family:inherit;}
 .hub-card.mission.ship{background:linear-gradient(160deg,rgba(180,107,255,.16),var(--panel));}
 .hub-grid.station .hub-card-sub{display:none;}
 
+/* ===================== HUB STATION MAP ===================== */
+.station-body{display:flex; flex-direction:column; align-items:center; padding:4px 8px 10px; overflow:hidden;}
+.station-caption{color:var(--ink-dim); font-size:.78rem; letter-spacing:.4px; text-align:center; margin:2px 0 2px;}
+.station-wrap{width:100%; flex:1; min-height:0; display:flex; align-items:center; justify-content:center;}
+.station-svg{width:100%; height:100%; max-width:560px; display:block; overflow:visible;}
+
+.station-pod{cursor:pointer; pointer-events:all; transform-box:fill-box; transform-origin:center; transition:transform .14s ease;}
+.station-pod .pod-body{fill:rgba(12,18,42,.82); stroke:currentColor; stroke-width:3; transition:filter .2s, fill .2s;}
+.station-pod .pod-screen{fill:rgba(4,8,22,.92); stroke:currentColor; stroke-width:2; opacity:.5;}
+.pod-icon{font-size:74px; text-anchor:middle; dominant-baseline:central;}
+.pod-label{font-size:44px; font-weight:800; text-anchor:middle; fill:#eef4ff;}
+.pod-sub{font-size:27px; text-anchor:middle; fill:#9aa6d6;}
+.pod-mission .pod-body{filter:drop-shadow(0 0 6px currentColor);}
+.station-pod:hover{transform:scale(1.05);}
+.station-pod:active{transform:scale(.97);}
+.station-pod:hover .pod-body,.station-pod:focus .pod-body{filter:drop-shadow(0 0 14px currentColor); fill:rgba(22,32,70,.94);}
+.station-pod:focus{outline:none;}
+.station-pod:focus-visible .pod-body{stroke-width:4;}
+
+.st-tag{font-size:20px; fill:#8b97c9; text-anchor:middle; letter-spacing:3px;}
+.reactor{transform-box:fill-box; transform-origin:center; animation:st-react 3s ease-in-out infinite;}
+@keyframes st-react{0%,100%{opacity:.7; transform:scale(.94)}50%{opacity:1; transform:scale(1.08)}}
+.st-flame{transform-box:fill-box; transform-origin:top center; animation:st-flame .45s ease-in-out infinite alternate;}
+@keyframes st-flame{from{transform:scaleY(.6); opacity:.55}to{transform:scaleY(1.05); opacity:1}}
+.nav-light{animation:st-blink 2.4s ease-in-out infinite;}
+.station-pod .nav-light:nth-of-type(2){animation-delay:.8s;}
+@keyframes st-blink{0%,100%{opacity:.25}50%{opacity:1}}
+.st-drift{transform-box:fill-box; transform-origin:center; animation:st-bob 6s ease-in-out infinite;}
+@keyframes st-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.hab-ring{transform-box:fill-box; transform-origin:center; animation:st-spin 70s linear infinite;}
+@keyframes st-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){
+  .reactor,.st-flame,.nav-light,.st-drift,.hab-ring{animation:none;}
+}
+
 /* ===================== PANELS (character / ship / robots / shop) ===================== */
 .panel-content{flex:1; overflow:auto; padding:0 16px 28px;}
 .tabs{display:flex; gap:6px; margin:4px 0 14px;}
