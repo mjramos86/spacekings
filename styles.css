@@ -351,7 +351,7 @@ button,input{font-family:inherit;}
 @keyframes ps-sway{0%,100%{transform:rotate(0deg)}50%{transform:rotate(1.6deg)}}
 
 /* first-person hands + blaster */
-.fp-gun{position:absolute; left:50%; bottom:-2%; width:min(94%,470px); transform:translateX(-50%); z-index:7; pointer-events:none; display:none;}
+.fp-gun{position:absolute; right:-3%; bottom:-4%; width:min(74%,380px); transform-origin:bottom right; transform:rotate(-25deg); z-index:7; pointer-events:none; display:none;}
 .run-scene.planet .fp-gun,.run-scene.corridor .fp-gun{display:block;}
 .fp-gun-inner{position:relative; display:block; transform-origin:50% 100%; animation:fp-idle 2.6s ease-in-out infinite;}
 .fp-gun.running .fp-gun-inner{animation:fp-run .62s ease-in-out infinite;}
@@ -359,7 +359,7 @@ button,input{font-family:inherit;}
 @keyframes fp-idle{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-4px) rotate(.5deg)}}
 @keyframes fp-run{0%{transform:translateY(0) rotate(-.9deg)}25%{transform:translateY(-11px) rotate(0deg)}50%{transform:translateY(0) rotate(.9deg)}75%{transform:translateY(-11px) rotate(0deg)}100%{transform:translateY(0) rotate(-.9deg)}}
 .fp-gun.fire{animation:fp-recoil .18s ease;}
-@keyframes fp-recoil{0%{transform:translateX(-50%) translateY(0)}40%{transform:translateX(-50%) translateY(12px)}100%{transform:translateX(-50%) translateY(0)}}
+@keyframes fp-recoil{0%{transform:rotate(-25deg) translateY(0)}45%{transform:rotate(-25deg) translateY(16px)}100%{transform:rotate(-25deg) translateY(0)}}
 .fp-laser{position:absolute; left:50%; bottom:86%; width:12px; height:0; transform:translateX(-50%);
   background:linear-gradient(180deg, rgba(120,220,255,0), #aef0ff 35%, #37e6ff); border-radius:8px; opacity:0;
   box-shadow:0 0 18px #37e6ff, 0 0 6px #fff;}
@@ -374,7 +374,8 @@ button,input{font-family:inherit;}
 .run-scene.planet #combat-view .player-weapon,.run-scene.corridor #combat-view .player-weapon{display:none;}
 .run-scene.planet #combat-view .player-area,.run-scene.corridor #combat-view .player-area{position:absolute; left:0; right:0; top:0; bottom:auto;
   background:linear-gradient(180deg, rgba(6,9,20,.85), rgba(6,9,20,0)); padding:calc(env(safe-area-inset-top) + 34px) 16px 16px;}
-.run-scene.planet #combat-view .enemy-area,.run-scene.corridor #combat-view .enemy-area{padding-bottom:26%;}
+/* on-foot: enemy stands ON the road (feet anchored low), name/HP float above it */
+.run-scene.planet #combat-view .enemy-stack,.run-scene.corridor #combat-view .enemy-stack{position:absolute; left:50%; bottom:28%; transform:translateX(-50%); width:max-content; max-width:92%;}
 .run-scene.planet .run-progress,.run-scene.corridor .run-progress{z-index:8;}
 @media (prefers-reduced-motion: reduce){ .ps-ufo,.ps-flora,.fp-gun-inner,.fp-flash,.cor-alarm{animation:none;} }
 
@@ -398,6 +399,7 @@ button,input{font-family:inherit;}
 
 /* enemy area (first-person: enemy ahead) */
 .enemy-area{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative;}
+.enemy-stack{display:flex; flex-direction:column; align-items:center; gap:8px;}
 .enemy-sprite{font-size:5.5rem; filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
 .enemy-emoji{display:inline-block;}
 .enemy-img{display:none; height:6rem; width:auto; max-width:80vw; image-rendering:auto; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
