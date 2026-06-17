@@ -191,9 +191,11 @@
     const save = S();
     const opts = [];
     for (let i = 0; i < 3; i++) {
+      const vessel = SK.pick(SK.ENEMY_POOLS.ships); // hull type -> drives the sprite
       opts.push({
         shipName: SK.pick(SK.PIRATE_SHIP_PREFIX) + " " + SK.pick(SK.PIRATE_SHIP_SUFFIX),
-        icon: SK.pick(SK.ENEMY_POOLS.ships).icon,
+        vessel,
+        icon: vessel.icon,
         level: Math.max(1, save.level + SK.randInt(-1, 2)),
         focusSlot: SK.pick(Object.keys(SK.SHIP_SLOTS)),
       });
@@ -201,7 +203,7 @@
     const cards = opts.map((o) => {
       const sd = SK.SHIP_SLOTS[o.focusSlot];
       return targetCard(o.icon, o.shipName,
-        "Pirate vessel • Threat Lv " + o.level,
+        o.vessel.name + "-class • Threat Lv " + o.level,
         `<span class="loot-chip">${sd.icon} ${sd.label}</span>` + rewardHint(o.level));
     });
     renderSelect("Ship Battle",
@@ -216,7 +218,7 @@
     setScene("space");
     setProgress([{ type: "boss" }], 0);
     const player = SK.makePlayerShip(save);
-    const enemy = SK.makeEnemyShip({ level: opt.level, name: opt.shipName, icon: opt.icon });
+    const enemy = SK.makeEnemyShip({ level: opt.level, name: opt.shipName, icon: opt.vessel.icon, sprite: opt.vessel.name });
     M().player = player; M().enemy = enemy;
     travel(() => {
       SK.Combat.start({

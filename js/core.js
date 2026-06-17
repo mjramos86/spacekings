@@ -282,7 +282,7 @@
     const engine = 8 + randInt(0, 3);
     return {
       side: "enemy", isShip: true, name: opts.name, icon: opts.icon,
-      sprite: SK.spritePath("ships", opts.name),
+      sprite: SK.spritePath("ships", opts.sprite || opts.name),
       maxHp: Math.round(160 + level * 24), hp: Math.round(160 + level * 24),
       shield: Math.round(36 + level * 7), maxShield: Math.round(36 + level * 7),
       atk: Math.round(9 + level * 2), def: 0, spd: engine,
