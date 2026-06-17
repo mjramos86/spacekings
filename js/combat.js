@@ -68,7 +68,10 @@
         : "";
       return (
         `<div class="enemy-area">` +
-          `<div class="enemy-sprite ${enemy.isBoss ? "boss" : ""}" id="cb-enemy">${enemy.icon}</div>` +
+          `<div class="enemy-sprite ${enemy.isBoss ? "boss" : ""}" id="cb-enemy">` +
+            `<span class="enemy-emoji">${enemy.icon}</span>` +
+            (enemy.sprite ? `<img class="enemy-img" alt="" src="${enemy.sprite}" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()">` : "") +
+          `</div>` +
           (enemy.isBoss ? `<div class="boss-tag">◆ BOSS ◆</div>` : "") +
           `<div class="combatant-name">${enemy.name}</div>` +
           enemyBars +

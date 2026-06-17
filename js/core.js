@@ -12,6 +12,14 @@
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   SK.rand = rand; SK.randInt = randInt; SK.pick = pick; SK.uid = uid;
 
+  /* ---------------- Sprite paths (drop PNGs in assets/sprites/*) ---------------- */
+  SK.slugify = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  SK.spritePath = (folder, name) => `assets/sprites/${folder}/${SK.slugify(name)}.png`;
+  SK.ENEMY_FOLDER = {
+    planetMinion: "planet", planetBoss: "planet-boss",
+    shipMinion: "ship-crew", shipBoss: "ship-boss", ships: "ships",
+  };
+
   /* ---------------- Runtime state ---------------- */
   SK.state = { save: null, mission: null };
   SK.save = function () { if (SK.state.save) SK.Storage.save(SK.state.save); };
@@ -247,6 +255,7 @@
     const defMult = isBoss ? 1.1 : 0.7;
     return {
       side: "enemy", name: tpl.name, icon: tpl.icon, isBoss,
+      sprite: SK.spritePath(SK.ENEMY_FOLDER[type] || "planet", tpl.name),
       maxHp: Math.round((90 + level * 26) * hpMult),
       hp: Math.round((90 + level * 26) * hpMult),
       atk: Math.round((10 + level * 2.6) * atkMult),
@@ -273,6 +282,7 @@
     const engine = 8 + randInt(0, 3);
     return {
       side: "enemy", isShip: true, name: opts.name, icon: opts.icon,
+      sprite: SK.spritePath("ships", opts.name),
       maxHp: Math.round(160 + level * 24), hp: Math.round(160 + level * 24),
       shield: Math.round(36 + level * 7), maxShield: Math.round(36 + level * 7),
       atk: Math.round(9 + level * 2), def: 0, spd: engine,

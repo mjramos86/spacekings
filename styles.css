@@ -399,6 +399,11 @@ button,input{font-family:inherit;}
 /* enemy area (first-person: enemy ahead) */
 .enemy-area{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative;}
 .enemy-sprite{font-size:5.5rem; filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
+.enemy-emoji{display:inline-block;}
+.enemy-img{display:none; height:6rem; width:auto; max-width:78vw; image-rendering:pixelated; image-rendering:crisp-edges;}
+.enemy-sprite.boss .enemy-img{height:8.5rem;}
+.enemy-sprite.hasimg .enemy-emoji{display:none;}
+.enemy-sprite.hasimg .enemy-img{display:block;}
 .enemy-sprite.boss{font-size:7rem; animation:bossidle 2s ease-in-out infinite;}
 @keyframes enemyidle{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes bossidle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}

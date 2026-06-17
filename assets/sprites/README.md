@@ -52,6 +52,11 @@ wired up automatically later. Prompts for each are in
 
 ---
 
-These map to `SK.ENEMY_POOLS` in `js/data.js`. Once the PNGs are in place, the
-game can be updated to use them in place of the current emoji icons (falling back
-to the emoji when a sprite is missing).
+**These are wired up and load automatically.** In combat the game looks for
+`assets/sprites/<folder>/<slug>.png` for each enemy and shows it in place of the
+emoji; if the file isn't there yet it quietly falls back to the emoji. So just
+drop a correctly-named PNG in the right folder, commit, and it appears in-game —
+no code changes needed.
+
+(Mapping lives in `SK.ENEMY_FOLDER` / `SK.spritePath` in `js/core.js`; rendering
+is in `js/combat.js`.)
