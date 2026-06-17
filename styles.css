@@ -400,13 +400,13 @@ button,input{font-family:inherit;}
 /* enemy area (first-person: enemy ahead) */
 .enemy-area{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative;}
 .enemy-stack{display:flex; flex-direction:column; align-items:center; gap:8px;}
-.enemy-sprite{font-size:5.5rem; filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
+.enemy-sprite{font-size:7rem; filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
 .enemy-emoji{display:inline-block;}
-.enemy-img{display:none; height:6rem; width:auto; max-width:80vw; image-rendering:auto; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
-.enemy-sprite.boss .enemy-img{height:9rem;}
+.enemy-img{display:none; height:9.5rem; width:auto; max-width:86vw; image-rendering:pixelated; image-rendering:crisp-edges; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
+.enemy-sprite.boss .enemy-img{height:13.5rem;}
 .enemy-sprite.hasimg .enemy-emoji{display:none;}
 .enemy-sprite.hasimg .enemy-img{display:block;}
-.enemy-sprite.boss{font-size:7rem; animation:bossidle 2s ease-in-out infinite;}
+.enemy-sprite.boss{font-size:9.5rem; animation:bossidle 2s ease-in-out infinite;}
 @keyframes enemyidle{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes bossidle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}
 .enemy-sprite.hit{animation:hitshake .28s;}
