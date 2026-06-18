@@ -79,6 +79,30 @@
     m.player = np;
   }
 
+  // Build an enemy party. Minion encounters = 1-3 minions; boss encounters =
+  // the boss flanked by up to 2 escort minions. Party members are scaled down
+  // a little so groups stay fair against focus-fire.
+  function buildParty(minionType, bossType, level, isBoss) {
+    if (isBoss) {
+      const boss = SK.makeEnemyCombatant({ type: bossType, level: level + 1, isBoss: true });
+      const n = SK.randInt(0, 2);
+      if (n > 0) { // escorted boss is trimmed so the group stays fair vs focus-fire
+        boss.atk = Math.round(boss.atk * 0.9);
+        boss.maxHp = boss.hp = Math.round(boss.maxHp * 0.85);
+      }
+      const minions = [];
+      for (let i = 0; i < n; i++) minions.push(SK.makeEnemyCombatant({ type: minionType, level, scale: 0.45 }));
+      const mid = Math.floor(minions.length / 2);
+      return [...minions.slice(0, mid), boss, ...minions.slice(mid)]; // boss centred
+    }
+    const size = SK.pick([1, 2, 2, 3]);
+    const scale = size === 3 ? 0.78 : size === 2 ? 0.9 : 1;
+    const party = [];
+    for (let i = 0; i < size; i++) party.push(SK.makeEnemyCombatant({ type: minionType, level, scale }));
+    return party;
+  }
+  const partyXP = (enemies, level) => enemies.reduce((s, e) => s + SK.xpForKill(level, e.isBoss), 0);
+
   function endModal(emoji, title, body, win) {
     SK.Combat.stop();
     UI.modal({
@@ -159,13 +183,13 @@
     const isBoss = m.seq[m.idx].type === "boss";
     if (m.idx > 0) m.player.hp = Math.min(m.player.maxHp, m.player.hp + Math.round(m.player.maxHp * 0.15));
     setProgress(m.seq, m.idx);
-    const enemy = SK.makeEnemyCombatant({ type: isBoss ? "planetBoss" : "planetMinion", level: m.level + (isBoss ? 1 : 0), isBoss });
+    const enemies = buildParty("planetMinion", "planetBoss", m.level, isBoss);
     SK.Combat.start({
-      player: m.player, enemy, isBoss,
+      player: m.player, enemies,
       onEnd: (win) => {
         if (!win) return missionFail("Your captain fell on Planet " + m.opt.name + ".");
-        save.stats.kills++;
-        applyXP(SK.xpForKill(m.level, isBoss));
+        save.stats.kills += enemies.length;
+        applyXP(partyXP(enemies, m.level));
         const cs = SK.getCharStats(save);
         const item = SK.generateItem({
           domain: "char", level: m.level + (isBoss ? 1 : 0),
@@ -279,13 +303,13 @@
     const isBoss = m.seq[m.idx].type === "boss";
     if (m.idx > 0) m.player.hp = Math.min(m.player.maxHp, m.player.hp + Math.round(m.player.maxHp * 0.15));
     setProgress(m.seq, m.idx);
-    const enemy = SK.makeEnemyCombatant({ type: isBoss ? "shipBoss" : "shipMinion", level: m.level + (isBoss ? 1 : 0), isBoss });
+    const enemies = buildParty("shipMinion", "shipBoss", m.level, isBoss);
     SK.Combat.start({
-      player: m.player, enemy, isBoss,
+      player: m.player, enemies,
       onEnd: (win) => {
         if (!win) return missionFail("Your boarding party was wiped out aboard " + m.opt.shipName + ".");
-        save.stats.kills++;
-        applyXP(SK.xpForKill(m.level, isBoss));
+        save.stats.kills += enemies.length;
+        applyXP(partyXP(enemies, m.level));
         const cs = SK.getCharStats(save);
         const dom = isBoss ? "char" : Math.random() < 0.3 ? "ship" : "char";
         const item = SK.generateItem({

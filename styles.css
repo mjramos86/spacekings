@@ -375,7 +375,7 @@ button,input{font-family:inherit;}
 .run-scene.planet #combat-view .player-area,.run-scene.corridor #combat-view .player-area{position:absolute; left:0; right:0; top:0; bottom:auto;
   background:linear-gradient(180deg, rgba(6,9,20,.85), rgba(6,9,20,0)); padding:calc(env(safe-area-inset-top) + 34px) 16px 16px;}
 /* on-foot: enemy stands ON the road (feet anchored low), name/HP float above it */
-.run-scene.planet #combat-view .enemy-stack,.run-scene.corridor #combat-view .enemy-stack{position:absolute; left:50%; bottom:28%; transform:translateX(-50%); width:max-content; max-width:92%;}
+.run-scene.planet #combat-view .enemy-row,.run-scene.corridor #combat-view .enemy-row{position:absolute; left:0; right:0; bottom:28%;}
 .run-scene.planet .run-progress,.run-scene.corridor .run-progress{z-index:8;}
 @media (prefers-reduced-motion: reduce){ .ps-ufo,.ps-flora,.fp-gun-inner,.fp-flash,.cor-alarm{animation:none;} }
 
@@ -399,16 +399,19 @@ button,input{font-family:inherit;}
 
 /* enemy area (first-person: enemy ahead) */
 .enemy-area{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative;}
-.enemy-stack{display:flex; flex-direction:column; align-items:center; gap:8px;}
-.enemy-sprite{font-size:9rem; filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
+.enemy-row{display:flex; justify-content:center; align-items:flex-end; gap:1.5vw; width:100%;}
+.enemy-stack{display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0;}
+.enemy-stack.dead{opacity:.16; transition:opacity .45s ease;}
+.enemy-row .combatant-name{font-size:.8rem;}
+.enemy-row .enemy-stack .hpbar{width:clamp(56px,80%,210px); height:13px;}
+.enemy-sprite{font-size:var(--es,9rem); filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
 .enemy-emoji{display:inline-block;}
-.enemy-img{display:none; height:12rem; width:auto; max-width:88vw; image-rendering:pixelated; image-rendering:crisp-edges; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
-.enemy-sprite.boss .enemy-img{height:16.5rem;}
-.enemy-sprite.ship .enemy-img{height:16rem;}
+.enemy-img{display:none; height:var(--es,12rem); width:var(--mw,60vw); object-fit:contain; object-position:50% 100%; image-rendering:pixelated; image-rendering:crisp-edges; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
+.enemy-sprite.boss .enemy-img{height:var(--bs,16.5rem); width:var(--bmw,66vw);}
+.enemy-sprite.ship .enemy-img{height:var(--es,16rem); width:var(--mw,72vw);}
 .enemy-sprite.hasimg .enemy-emoji{display:none;}
 .enemy-sprite.hasimg .enemy-img{display:block;}
-.enemy-sprite.boss{font-size:12rem; animation:bossidle 2s ease-in-out infinite;}
-.enemy-sprite.ship{font-size:11rem;}
+.enemy-sprite.boss{font-size:var(--bs,12rem); animation:bossidle 2s ease-in-out infinite;}
 @keyframes enemyidle{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes bossidle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}
 .enemy-sprite.hit{animation:hitshake .28s;}

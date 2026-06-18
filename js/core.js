@@ -253,12 +253,13 @@
     const hpMult = isBoss ? 1.7 : 0.8;
     const atkMult = isBoss ? 1.05 : 0.8;
     const defMult = isBoss ? 1.1 : 0.7;
+    const scale = opts.scale || 1; // party members are scaled down a touch for fairness
     return {
       side: "enemy", name: tpl.name, icon: tpl.icon, isBoss,
       sprite: SK.spritePath(SK.ENEMY_FOLDER[type] || "planet", tpl.name),
-      maxHp: Math.round((90 + level * 26) * hpMult),
-      hp: Math.round((90 + level * 26) * hpMult),
-      atk: Math.round((10 + level * 2.6) * atkMult),
+      maxHp: Math.round((90 + level * 26) * hpMult * scale),
+      hp: Math.round((90 + level * 26) * hpMult * scale),
+      atk: Math.round((10 + level * 2.6) * atkMult * scale),
       def: Math.round((3 + level * 1.3) * defMult),
       spd: isBoss ? 9 : 7 + randInt(0, 4),
       critPct: isBoss ? 10 : 5, critDmgPct: 50,
