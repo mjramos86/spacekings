@@ -11,12 +11,16 @@ enemy sprites.
 - **Aspect ratio:** set **9:16 (portrait)** in the tool (each prompt also says it).
 - One scene per file, **opaque** (not transparent). Save as:
   - planets → `assets/backgrounds/planet/<slug>.png`
-  - ships → `assets/backgrounds/ships/<slug>.png`
+  - ships (space) → `assets/backgrounds/ships/<slug>.png`
+  - corridors (boarding) → `assets/backgrounds/corridor/<slug>.png`
 - **Composition matters** (so the gameplay overlays fit):
   - *Planets:* first‑person eye‑level, a **path receding to a horizon near the
     vertical middle**; keep the **lower third + bottom‑center open** (that's where
     enemies stand and your blaster sits) — **no characters, creatures, or weapons**.
   - *Ships:* open **deep space with a clear center** for the ships — **no ships, no UI**.
+  - *Corridors:* first‑person **one‑point perspective down a ship hallway** to a closed
+    bulkhead door at the far end; keep the **lower third + bottom‑center open** — **no
+    characters, no weapons**.
 
 **Shared style line** (already appended to every prompt):
 > *retro 16‑bit pixel art, SNES/Sega‑Genesis era, limited cohesive palette,
@@ -180,12 +184,73 @@ characters, vertical 9:16 portrait background.
 
 ---
 
+## 🚪 Ship interior corridors (boarding — one per enemy vessel)
+
+### Marauder — `marauder`
+```
+Interior corridor of a scrappy pirate raider, first-person one-point-perspective view down
+the hallway toward a closed bulkhead door at the far end. Mismatched welded scrap-metal
+wall plates, exposed wiring and pipes, rust streaks, scattered crates, flickering dim
+lights; gritty makeshift mood; cyan emergency strip-lights along the metal floor, a small
+star-lit viewport in the far door; lower third and bottom-center kept open. Palette: rusty
+browns and gunmetal with cyan glow. Retro 16-bit pixel art, SNES/Sega-Genesis era, limited
+cohesive palette, dithered shading, deep interior perspective, no text, no UI, no
+characters, no weapons, vertical 9:16 portrait background.
+```
+
+### Frigate — `frigate`
+```
+Interior corridor of a military frigate, first-person one-point-perspective view down the
+hallway toward a reinforced bulkhead door at the far end. Clean riveted steel panels,
+recessed ceiling lights, numbered hatches along the sides, pulsing red alert strips;
+disciplined tense mood; metal floor leading away; lower third and bottom-center kept open.
+Palette: steel-blue and slate with red alert accents. Retro 16-bit pixel art,
+SNES/Sega-Genesis era, limited cohesive palette, dithered shading, deep interior
+perspective, no text, no UI, no characters, no weapons, vertical 9:16 portrait background.
+```
+
+### Dreadnought — `dreadnought`
+```
+Interior corridor of a massive dreadnought, first-person one-point-perspective view down a
+cavernous hallway toward a huge blast door at the far end. Towering industrial bulkheads,
+thick armored ribs, heavy machinery and cables overhead, deep shadows; oppressive scale,
+foreboding mood; ominous orange work-lights along the floor; lower third and bottom-center
+kept open. Palette: dark gunmetal with ominous orange glow. Retro 16-bit pixel art,
+SNES/Sega-Genesis era, limited cohesive palette, dithered shading, deep interior
+perspective, no text, no UI, no characters, no weapons, vertical 9:16 portrait background.
+```
+
+### Corsair — `corsair`
+```
+Interior corridor of a sleek corsair attack ship, first-person one-point-perspective view
+down the hallway toward a sleek bulkhead door at the far end. Smooth black wall panels with
+sharp angular trim, neon-crimson light strips, polished dark floor, minimalist; fast and
+predatory mood; the far door glowing red; lower third and bottom-center kept open. Palette:
+black and crimson with hot-red neon accents. Retro 16-bit pixel art, SNES/Sega-Genesis era,
+limited cohesive palette, dithered shading, deep interior perspective, no text, no UI, no
+characters, no weapons, vertical 9:16 portrait background.
+```
+
+### Reaver — `reaver`
+```
+Interior corridor of a derelict scavenger reaver, first-person one-point-perspective view
+down a damaged hallway toward a battered bulkhead door at the far end. Broken and torn wall
+panels, dangling cables and sparks, scattered wreckage and grime, drifting haze; eerie
+decayed mood; sickly toxic-green emergency lighting along the floor; lower third and
+bottom-center kept open. Palette: scorched dark metal with toxic-green glow. Retro 16-bit
+pixel art, SNES/Sega-Genesis era, limited cohesive palette, dithered shading, deep interior
+perspective, no text, no UI, no characters, no weapons, vertical 9:16 portrait background.
+```
+
+---
+
 ## Slugs
 
 | Group | Slugs |
 |---|---|
 | Planet biomes | `jungle`, `volcanic`, `frozen`, `desert`, `toxic`, `crystal`, `oceanic`, `barren` |
-| Ship vessels | `marauder`, `frigate`, `dreadnought`, `corsair`, `reaver` |
+| Ship vessels (space) | `marauder`, `frigate`, `dreadnought`, `corsair`, `reaver` |
+| Ship corridors (boarding) | `marauder`, `frigate`, `dreadnought`, `corsair`, `reaver` |
 
 > When the images are ready I can wire them in (like the sprites): the planet
 > background per biome and the space backdrop per enemy vessel, layered behind the
