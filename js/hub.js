@@ -29,7 +29,7 @@
       `<div class="item-row" data-rarity="${item.rarity}">` +
         `<div class="ir-icon">${item.icon}</div>` +
         `<div class="ir-main">` +
-          `<div class="ir-name r-${item.rarity}">${item.name}</div>` +
+          `<div class="ir-name r-${item.rarity}">${item.name}${item.plus ? ' <span class="plus">+' + item.plus + "</span>" : ""}</div>` +
           `<div class="ir-meta">${SK.RARITIES[item.rarity].name} • ${item.slotLabel} • Lv ${item.level}</div>` +
           `<div class="ir-stats">${statsAbsInline(item)}</div>` +
           (extraLine ? `<div class="ir-stats">${extraLine}</div>` : "") +
@@ -37,6 +37,12 @@
         `<div class="ir-actions">${actionsHTML}</div>` +
       `</div>`
     );
+  }
+
+  function upgBtn(item, attr) {
+    if (!SK.canUpgrade(item)) return `<button class="btn btn-ghost btn-sm" disabled>MAX +${item.plus || 0}</button>`;
+    const c = SK.upgradeCost(item);
+    return `<button class="btn btn-up btn-sm" ${attr}>⬆ 💰${c.credits} ⚙️${c.scrap}</button>`;
   }
 
   const Hub = {
@@ -47,6 +53,7 @@
       $("#hub-avatar").innerHTML = UI.avatarSVG(s.appearance, 46);
       $("#hub-name").textContent = s.name + "  ·  Lv " + s.level;
       $("#hub-credits").textContent = "💰 " + s.credits;
+      const scrapEl = $("#hub-scrap"); if (scrapEl) scrapEl.textContent = "⚙️ " + (s.scrap || 0);
       const need = SK.xpToNext(s.level);
       $("#hub-xpfill").style.width = Math.min(100, (s.xp / need) * 100) + "%";
       $("#hub-xptext").textContent = "XP " + s.xp + " / " + need;
@@ -71,13 +78,16 @@
       const slots = domain === "char" ? SK.CHAR_SLOTS : SK.SHIP_SLOTS;
       const equipped = save.equipped[domain];
 
+      const power = domain === "char" ? SK.charPower(save) : SK.shipPower(save);
       const sheet = domain === "char"
         ? `<div class="sheet"><div class="sheet-av">${UI.avatarSVG(save.appearance, 84)}</div>` +
           `<div class="sheet-meta"><div class="sheet-name">${save.name}</div>` +
-          `<div class="sheet-lvl">Captain • Level ${save.level}</div></div></div>`
+          `<div class="sheet-lvl">Captain • Level ${save.level}</div>` +
+          `<div class="sheet-power">⚡ Power ${power}</div></div></div>`
         : `<div class="sheet"><div class="sheet-av" style="display:flex;align-items:center;justify-content:center;font-size:2.6rem">🚀</div>` +
           `<div class="sheet-meta"><div class="sheet-name">${save.shipName}</div>` +
-          `<div class="sheet-lvl">Starship • Level ${save.level}</div></div></div>`;
+          `<div class="sheet-lvl">Starship • Level ${save.level}</div>` +
+          `<div class="sheet-power">⚡ Power ${power}</div></div></div>`;
 
       const statGrid = `<div class="stat-grid">` + Object.keys(meta).map((k) =>
         `<div class="stat-row"><span class="si">${meta[k].icon}</span><span class="sl">${meta[k].label}</span>` +
@@ -91,7 +101,7 @@
           return `<div class="slot" data-slot="${k}" ${it ? `data-rarity="${it.rarity}"` : ""}>` +
             `<div class="slot-icon">${def.icon}</div><div class="slot-info">` +
             `<div class="slot-kind">${def.label}</div>` +
-            (it ? `<div class="slot-name r-${it.rarity}">${it.name}</div>`
+            (it ? `<div class="slot-name r-${it.rarity}">${it.name}${it.plus ? " +" + it.plus : ""}</div>`
                 : `<div class="slot-empty">Empty — tap to equip</div>`) +
             `</div></div>`;
         }).join("") + `</div>`;
@@ -117,7 +127,7 @@
 
       const curHTML = current
         ? `<div class="muted" style="font-size:.72rem;text-align:left;margin-bottom:6px">Equipped</div>` +
-          itemRow(current, `<button class="btn btn-ghost btn-sm" data-unequip>Unequip</button>`)
+          itemRow(current, upgBtn(current, "data-upg-eq") + `<button class="btn btn-ghost btn-sm" data-unequip>Unequip</button>`)
         : `<div class="muted center" style="margin-bottom:10px">No ${def.label} equipped.</div>`;
 
       const listHTML = list.length
@@ -125,6 +135,7 @@
           `<div class="item-list">` + list.map((it) =>
             itemRow(it,
               `<button class="btn btn-equip btn-sm" data-equip="${it.id}">Equip</button>` +
+              upgBtn(it, `data-upg="${it.id}"`) +
               `<button class="btn btn-sell btn-sm" data-sell="${it.id}">💰${it.value}</button>`,
               deltaInline(it))
           ).join("") + `</div>`
@@ -141,16 +152,34 @@
       const refresh = () => { UI.closeModal(); this._picker(domain, slotKey); };
       const un = body.querySelector("[data-unequip]");
       if (un) un.onclick = () => { SK.unequip(save, domain, slotKey); UI.toast("Unequipped"); this._rerender && this._rerender(); refresh(); };
+      const ue = body.querySelector("[data-upg-eq]");
+      if (ue) ue.onclick = () => { this._doUpgrade(current); this._rerender && this._rerender(); refresh(); };
       body.querySelectorAll("[data-equip]").forEach((b) => b.onclick = () => {
         const it = save.inventory.find((x) => x.id === b.dataset.equip);
         if (it) { SK.equipItem(save, it); UI.toast("Equipped " + it.name, "good"); }
         this.refreshTop(); this._rerender && this._rerender(); refresh();
       });
+      body.querySelectorAll("[data-upg]").forEach((b) => b.onclick = () => {
+        const it = save.inventory.find((x) => x.id === b.dataset.upg);
+        if (it) this._doUpgrade(it);
+        refresh();
+      });
       body.querySelectorAll("[data-sell]").forEach((b) => b.onclick = () => {
         const it = save.inventory.find((x) => x.id === b.dataset.sell);
-        if (it) { const v = SK.sellItem(save, it); UI.toast("+💰 " + v, "gold"); }
+        if (it) { const r = SK.sellItem(save, it); UI.toast("+💰" + r.credits + " ⚙️" + r.scrap, "gold"); }
         this.refreshTop(); refresh();
       });
+    },
+
+    _doUpgrade(item) {
+      if (!item) return;
+      const save = SK.state.save;
+      if (!SK.canUpgrade(item)) { UI.toast("Already max upgrade", "bad"); return; }
+      const c = SK.upgradeCost(item);
+      if (save.credits < c.credits || (save.scrap || 0) < c.scrap) { UI.toast("Need 💰" + c.credits + " ⚙️" + c.scrap, "bad"); return; }
+      SK.upgradeItem(save, item);
+      UI.toast(item.name + " → +" + item.plus, "good");
+      this.refreshTop();
     },
 
     /* ===================== ROBOTICS ===================== */
@@ -275,6 +304,7 @@
           ? `<div class="item-list">` + inv.map((it) =>
               itemRow(it,
                 `<button class="btn btn-equip btn-sm" data-equip="${it.id}">Equip</button>` +
+                upgBtn(it, `data-upg="${it.id}"`) +
                 `<button class="btn btn-sell btn-sm" data-sell="${it.id}">💰${it.value}</button>`,
                 deltaInline(it))
             ).join("") + `</div>`
@@ -323,9 +353,14 @@
           if (it) { SK.equipItem(save, it); UI.toast("Equipped " + it.name, "good"); }
           this.refreshTop(); this._shop(tab);
         });
+        c.querySelectorAll("[data-upg]").forEach((b) => b.onclick = () => {
+          const it = save.inventory.find((x) => x.id === b.dataset.upg);
+          if (it) this._doUpgrade(it);
+          this._shop(tab);
+        });
         c.querySelectorAll("[data-sell]").forEach((b) => b.onclick = () => {
           const it = save.inventory.find((x) => x.id === b.dataset.sell);
-          if (it) { const v = SK.sellItem(save, it); UI.toast("+💰 " + v, "gold"); }
+          if (it) { const r = SK.sellItem(save, it); UI.toast("+💰" + r.credits + " ⚙️" + r.scrap, "gold"); }
           this.refreshTop(); this._shop(tab);
         });
       });

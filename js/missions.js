@@ -1,8 +1,10 @@
 /* ===================================================================
    SPACE KINGS — missions.js
-   Planet Exploration and Ship Battle flows.
-   Foot chains = 3 minions + boss, each drops a loot card.
-   Ship battle = ship-vs-ship; at 10% enemy HP choose Destroy or Board.
+   Planet Exploration & Ship Battle, with:
+   - gear-aware difficulty (effective level)
+   - mission tiers (Patrol/Standard/Elite/Nightmare)
+   - "push deeper" depth ramp with extract-or-descend (push-your-luck haul)
+   - elite affixes at higher tiers/depth
    =================================================================== */
 (function () {
   const SK = (window.SK = window.SK || {});
@@ -10,12 +12,11 @@
   const UI = SK.UI;
   const S = () => SK.state.save;
   const M = () => SK.state.mission;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-  /* ---------------- shared run-screen helpers ---------------- */
+  /* ---------------- run-screen helpers ---------------- */
   function showRun() { UI.showScreen("screen-run"); }
 
-  // scene modes: 'space' = starfield (ship-vs-ship), 'planet' = alien surface +
-  // first-person weapon, 'corridor' = grid (on-foot boarding / default)
   function setScene(mode) {
     const sc = $("#run-scene");
     sc.classList.remove("space", "planet", "corridor");
@@ -46,7 +47,7 @@
   function travel(cb) {
     const t = $("#run-travel");
     $("#combat-view").classList.remove("show");
-    const g = $("#fp-gun"); if (g) g.classList.add("running"); // bigger weapon bob while moving
+    const g = $("#fp-gun"); if (g) g.classList.add("running");
     t.classList.add("show");
     setTimeout(() => { t.classList.remove("show"); if (g) g.classList.remove("running"); cb(); }, 1050);
   }
@@ -59,19 +60,12 @@
 
   function showLoot(item, cb) {
     SK.Cards.show(item, (action) => {
-      if (action === "equip") {
-        SK.equipItem(S(), item);
-        UI.toast("Equipped " + item.name, "good");
-      } else {
-        const v = SK.sellItem(S(), item);
-        UI.toast("Sold for 💰 " + v, "gold");
-      }
+      if (action === "equip") { SK.equipItem(S(), item); UI.toast("Equipped " + item.name, "good"); }
+      else { const r = SK.sellItem(S(), item); UI.toast("Sold ▸ 💰" + r.credits + " · ⚙️" + r.scrap, "gold"); }
       cb();
     });
   }
 
-  // Rebuild the on-foot player's stats from the save (e.g. after equipping
-  // loot mid-run) while preserving the current HP fraction.
   function refreshFootPlayer(m) {
     const frac = m.player.hp / m.player.maxHp;
     const np = SK.makePlayerCombatant(S());
@@ -79,35 +73,75 @@
     m.player = np;
   }
 
-  // Build an enemy party. Minion encounters = 1-3 minions; boss encounters =
-  // the boss flanked by up to 2 escort minions. Party members are scaled down
-  // a little so groups stay fair against focus-fire.
-  function buildParty(minionType, bossType, level, isBoss) {
+  /* ---------------- difficulty context (tier + depth) ---------------- */
+  function ctx(m) {
+    const B = SK.BALANCE, d = m.depth - 1;
+    return {
+      level: Math.max(1, m.baseLevel + d),
+      mul: m.tier.enemyMul * (1 + d * B.depthEnemyMul),
+      affixCount: Math.min(3, m.tier.affixes + Math.floor(d / B.affixDepthStep)),
+      rareMul: m.tier.rare * (1 + d * B.depthRareBonus),
+      partyBonus: m.tier.partyBonus,
+    };
+  }
+
+  // Build a party for a foot encounter using the difficulty context.
+  function buildParty(minionType, bossType, isBoss, c) {
     if (isBoss) {
-      const boss = SK.makeEnemyCombatant({ type: bossType, level: level + 1, isBoss: true });
+      const boss = SK.makeEnemyCombatant({ type: bossType, level: c.level + 1, isBoss: true, mul: c.mul });
       const n = SK.randInt(0, 2);
-      if (n > 0) { // escorted boss is trimmed so the group stays fair vs focus-fire
-        boss.atk = Math.round(boss.atk * 0.9);
-        boss.maxHp = boss.hp = Math.round(boss.maxHp * 0.85);
-      }
+      if (n > 0) { boss.atk = Math.round(boss.atk * 0.9); boss.maxHp = boss.hp = Math.round(boss.maxHp * 0.85); }
+      SK.applyAffixes(boss, c.affixCount);
       const minions = [];
-      for (let i = 0; i < n; i++) minions.push(SK.makeEnemyCombatant({ type: minionType, level, scale: 0.45 }));
+      for (let i = 0; i < n; i++) minions.push(SK.makeEnemyCombatant({ type: minionType, level: c.level, scale: 0.45, mul: c.mul }));
       const mid = Math.floor(minions.length / 2);
-      return [...minions.slice(0, mid), boss, ...minions.slice(mid)]; // boss centred
+      return [...minions.slice(0, mid), boss, ...minions.slice(mid)];
     }
-    const size = SK.pick([1, 2, 2, 3]);
+    const size = clamp(SK.pick([1, 2, 2, 3]) + (c.partyBonus || 0), 1, 3);
     const scale = size === 3 ? 0.78 : size === 2 ? 0.9 : 1;
     const party = [];
-    for (let i = 0; i < size; i++) party.push(SK.makeEnemyCombatant({ type: minionType, level, scale }));
+    for (let i = 0; i < size; i++) party.push(SK.makeEnemyCombatant({ type: minionType, level: c.level, scale, mul: c.mul }));
+    if (c.affixCount > 0) SK.applyAffixes(party[SK.randInt(0, size - 1)], c.affixCount); // one "elite" minion
     return party;
   }
-  const partyXP = (enemies, level) => enemies.reduce((s, e) => s + SK.xpForKill(level, e.isBoss), 0);
+  const partyXP = (enemies, m) => Math.round(enemies.reduce((s, e) => s + SK.xpForKill(m.baseLevel + m.depth - 1, e.isBoss), 0) * m.tier.credMul);
 
+  /* ---------------- haul (push-your-luck reward) ---------------- */
+  function addHaul(m) {
+    const B = SK.BALANCE, lvl = Math.max(1, m.baseLevel + m.depth - 1);
+    m.haul.credits += Math.round(B.haulCreditsPerEnc * lvl * m.tier.credMul * (1 + (m.depth - 1) * 0.25));
+    m.haul.scrap += Math.round(B.haulScrapPerEnc * lvl * m.tier.credMul) + 1;
+  }
+  function bankHaul(m) {
+    const save = S();
+    save.credits += m.haul.credits;
+    save.scrap = (save.scrap || 0) + m.haul.scrap;
+    UI.toast("Haul banked ▸ 💰" + m.haul.credits + " · ⚙️" + m.haul.scrap, "gold");
+    m.haul = { credits: 0, scrap: 0 };
+    SK.save();
+  }
+
+  // Extract-or-descend prompt after a sector is cleared.
+  function depthChoice(emoji, onDescend, onExtract) {
+    const m = M();
+    UI.modal({
+      title: "Sector cleared — Depth " + m.depth,
+      body: `<span class="big-emoji">${emoji}</span>` +
+        `Pending haul: <b>💰 ${m.haul.credits}</b> · <b>⚙️ ${m.haul.scrap}</b>.<br><br>` +
+        `<b>Extract</b> to bank it, or <b>descend deeper</b> for higher threat and richer loot. ` +
+        `If you fall, the pending haul is lost.`,
+      actions: [
+        { label: "Extract", class: "btn-primary", onClick: onExtract },
+        { label: "Descend ▾", class: "btn-gold", onClick: onDescend },
+      ],
+    });
+  }
+
+  /* ---------------- mission end ---------------- */
   function endModal(emoji, title, body, win) {
     SK.Combat.stop();
     UI.modal({
-      title,
-      body: `<span class="big-emoji">${emoji}</span>${body}`,
+      title, body: `<span class="big-emoji">${emoji}</span>${body}`,
       actions: [{ label: "Return to Station", class: win ? "btn-primary" : "btn-ghost", onClick: returnHub }],
     });
   }
@@ -122,13 +156,15 @@
   }
 
   /* ---------------- selection UI ---------------- */
-  function rewardHint(level) {
-    const pl = S().level;
-    const r = level >= pl + 2 ? "epic" : level >= pl + 1 ? "rare" : "uncommon";
-    return `<span class="loot-chip r-${r}">✦ up to ${SK.RARITIES[r].name}</span>`;
+  function chooseTiers(save) {
+    const top = save.level >= 6 && Math.random() < 0.4 ? SK.TIER.nightmare : SK.TIER.elite;
+    return [SK.TIER.patrol, SK.TIER.standard, top];
   }
-  function targetCard(icon, name, sub, chips) {
-    return `<div class="target-card"><div class="tc-icon">${icon}</div><div class="tc-main">` +
+  function tierBadge(t) {
+    return `<span class="loot-chip tier-badge" style="border-color:${t.color};color:${t.color}">${t.name}</span>`;
+  }
+  function targetCard(icon, name, sub, chips, tier) {
+    return `<div class="target-card" style="border-left:4px solid ${tier.color}"><div class="tc-icon">${icon}</div><div class="tc-main">` +
       `<div class="tc-name">${name}</div><div class="tc-sub">${sub}</div>` +
       `<div class="tc-loot">${chips}</div></div></div>`;
   }
@@ -144,32 +180,36 @@
      PLANET EXPLORATION
      ================================================================= */
   function startPlanet() {
-    const save = S();
-    const opts = [];
-    for (let i = 0; i < 3; i++) {
-      opts.push({
-        biome: SK.pick(SK.PLANET_BIOMES),
-        name: SK.pick(SK.PLANET_NAMES) + "-" + SK.randInt(1, 9),
-        level: Math.max(1, save.level + SK.randInt(-1, 2)),
-        focusSlot: SK.pick(Object.keys(SK.CHAR_SLOTS)),
-      });
-    }
+    // tiers are the difficulty band; depth is the infinite ramp. Threat is
+    // level-based (gear lets you out-gear low tiers — push tiers/depth for more).
+    const save = S(), eff = save.level;
+    const opts = chooseTiers(save).map((tier) => ({
+      tier,
+      biome: SK.pick(SK.PLANET_BIOMES),
+      name: SK.pick(SK.PLANET_NAMES) + "-" + SK.randInt(1, 9),
+      level: Math.max(1, eff + tier.dLevel),
+      focusSlot: SK.pick(Object.keys(SK.CHAR_SLOTS)),
+    }));
     const cards = opts.map((o) => {
       const sd = SK.CHAR_SLOTS[o.focusSlot];
-      return targetCard(o.biome.icon, "Planet " + o.name,
-        o.biome.name + " world • Threat Lv " + o.level,
-        `<span class="loot-chip">${sd.icon} ${sd.label}s</span>` + rewardHint(o.level));
+      const chips = tierBadge(o.tier) +
+        `<span class="loot-chip">${sd.icon} ${sd.label}s</span>` +
+        `<span class="loot-chip">⚔️ Threat ${o.level}</span>` +
+        (o.tier.lootMul > 1 ? `<span class="loot-chip r-epic">✦ loot ×${o.tier.lootMul}</span>` : "") +
+        (o.tier.affixes ? `<span class="loot-chip r-rare">☣ affixes</span>` : "");
+      return targetCard(o.biome.icon, "Planet " + o.name, o.biome.name + " world", chips, o.tier);
     });
     renderSelect("Planet Exploration",
-      "Scanners found three worlds. Pick one — clear 3 encounters and the boss.",
+      "Pick a sector. Clear it, then extract — or push deeper for richer loot at rising threat.",
       cards, (i) => beginPlanet(opts[i]));
   }
 
   function beginPlanet(opt) {
     SK.state.mission = {
-      kind: "planet", opt, level: opt.level, idx: 0,
+      kind: "planet", opt, tier: opt.tier, baseLevel: opt.level, depth: 1, idx: 0,
       player: SK.makePlayerCombatant(S()),
       seq: [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }],
+      haul: { credits: 0, scrap: 0 },
     };
     showRun();
     $(".planet-scene").innerHTML = SK.UI.planetSceneSVG(SK.PLANET_PALETTES[opt.biome.name] || SK.PLANET_PALETTES.default);
@@ -179,29 +219,33 @@
   }
 
   function planetEncounter() {
-    const m = M(), save = S();
+    const m = M(), save = S(), c = ctx(m);
     const isBoss = m.seq[m.idx].type === "boss";
     if (m.idx > 0) m.player.hp = Math.min(m.player.maxHp, m.player.hp + Math.round(m.player.maxHp * 0.15));
     setProgress(m.seq, m.idx);
-    const enemies = buildParty("planetMinion", "planetBoss", m.level, isBoss);
+    const enemies = buildParty("planetMinion", "planetBoss", isBoss, c);
     SK.Combat.start({
       player: m.player, enemies,
       onEnd: (win) => {
-        if (!win) return missionFail("Your captain fell on Planet " + m.opt.name + ".");
+        if (!win) return missionFail("Your captain fell on Planet " + m.opt.name + " (depth " + m.depth + ").");
         save.stats.kills += enemies.length;
-        applyXP(partyXP(enemies, m.level));
-        const cs = SK.getCharStats(save);
+        applyXP(partyXP(enemies, m));
+        addHaul(m);
         const item = SK.generateItem({
-          domain: "char", level: m.level + (isBoss ? 1 : 0),
-          focusSlot: m.opt.focusSlot, luck: cs.luck, rareBoost: isBoss ? 2.5 : 1,
+          domain: "char", level: c.level + (isBoss ? 1 : 0),
+          focusSlot: m.opt.focusSlot, luck: SK.getCharStats(save).luck, rareBoost: (isBoss ? 2.5 : 1) * c.rareMul,
         });
         showLoot(item, () => {
           refreshFootPlayer(m);
           m.idx++;
           if (m.idx >= m.seq.length) {
             save.stats.planetsCleared++;
-            applyXP(40 + m.level * 5);
-            missionDone("🪐", "Planet Cleared!", "Planet " + m.opt.name + " explored and looted.");
+            depthChoice("🪐",
+              () => { m.depth++; m.idx = 0; m.seq = [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }];
+                m.player.hp = Math.min(m.player.maxHp, m.player.hp + Math.round(m.player.maxHp * 0.4));
+                UI.toast("Descending to depth " + m.depth + "…"); travel(planetEncounter); },
+              () => { bankHaul(m); applyXP(20 + c.level * 4);
+                missionDone("🪐", "Sector Cleared!", "Planet " + m.opt.name + " — extracted at depth " + m.depth + "."); });
           } else travel(planetEncounter);
         });
       },
@@ -212,46 +256,51 @@
      SHIP BATTLE
      ================================================================= */
   function startShip() {
-    const save = S();
-    const opts = [];
-    for (let i = 0; i < 3; i++) {
-      const vessel = SK.pick(SK.ENEMY_POOLS.ships); // hull type -> drives the sprite
-      opts.push({
-        shipName: SK.pick(SK.PIRATE_SHIP_PREFIX) + " " + SK.pick(SK.PIRATE_SHIP_SUFFIX),
-        vessel,
-        icon: vessel.icon,
-        level: Math.max(1, save.level + SK.randInt(-1, 2)),
-        focusSlot: SK.pick(Object.keys(SK.SHIP_SLOTS)),
-      });
-    }
+    const save = S(), eff = save.level;
+    const opts = chooseTiers(save).map((tier) => ({
+      tier,
+      vessel: SK.pick(SK.ENEMY_POOLS.ships),
+      shipName: SK.pick(SK.PIRATE_SHIP_PREFIX) + " " + SK.pick(SK.PIRATE_SHIP_SUFFIX),
+      level: Math.max(1, eff + tier.dLevel),
+      focusSlot: SK.pick(Object.keys(SK.SHIP_SLOTS)),
+    }));
     const cards = opts.map((o) => {
       const sd = SK.SHIP_SLOTS[o.focusSlot];
-      return targetCard(o.icon, o.shipName,
-        o.vessel.name + "-class • Threat Lv " + o.level,
-        `<span class="loot-chip">${sd.icon} ${sd.label}</span>` + rewardHint(o.level));
+      const chips = tierBadge(o.tier) +
+        `<span class="loot-chip">${sd.icon} ${sd.label}</span>` +
+        `<span class="loot-chip">⚔️ Threat ${o.level}</span>` +
+        (o.tier.lootMul > 1 ? `<span class="loot-chip r-epic">✦ loot ×${o.tier.lootMul}</span>` : "");
+      return targetCard(o.vessel.icon, o.shipName, o.vessel.name + "-class", chips, o.tier);
     });
     renderSelect("Ship Battle",
-      "Three pirate ships on the scope. Engage one — destroy it for salvage, or board for the real haul.",
+      "Engage a pirate. Destroy it or board for loot — then extract or hunt deeper.",
       cards, (i) => beginShip(opts[i]));
   }
 
   function beginShip(opt) {
-    const save = S();
-    SK.state.mission = { kind: "ship", opt, level: opt.level, phase: "space" };
+    SK.state.mission = {
+      kind: "ship", opt, tier: opt.tier, baseLevel: opt.level, depth: 1, phase: "space",
+      haul: { credits: 0, scrap: 0 },
+    };
     showRun();
+    shipSpacePhase();
+  }
+
+  // (re)start the ship-vs-ship phase for the current depth
+  function shipSpacePhase() {
+    const m = M(), save = S(), c = ctx(m);
+    m.phase = "space";
     setScene("space");
     setProgress([{ type: "boss" }], 0);
     const player = SK.makePlayerShip(save);
-    const enemy = SK.makeEnemyShip({ level: opt.level, name: opt.shipName, icon: opt.vessel.icon, sprite: opt.vessel.name });
-    M().player = player; M().enemy = enemy;
+    const enemy = SK.makeEnemyShip({ level: c.level, name: m.opt.shipName, icon: m.opt.vessel.icon, sprite: m.opt.vessel.name, mul: c.mul });
+    SK.applyAffixes(enemy, c.affixCount);
+    m.player = player; m.enemy = enemy;
     travel(() => {
       SK.Combat.start({
         player, enemy, thresholdPct: 0.10,
         onThreshold: shipChoice,
-        onEnd: (win) => {
-          if (!win) return missionFail("Your ship " + save.shipName + " was destroyed in the void.");
-          shipDestroyed(); // outright kill before the 10% prompt
-        },
+        onEnd: (win) => { if (!win) return missionFail("Your ship " + save.shipName + " was destroyed (depth " + m.depth + ")."); shipDestroyed(); },
       });
     });
   }
@@ -260,7 +309,7 @@
     const ch = SK.Combat.choiceEl();
     ch.innerHTML =
       `<h3>Enemy Ship Crippled!</h3>` +
-      `<p>The pirate vessel is venting atmosphere. Finish it for a quick salvage, or board it to fight the crew for far greater spoils.</p>` +
+      `<p>Finish it for a quick salvage, or board it to fight the crew for far greater spoils.</p>` +
       `<div class="choice-btns">` +
         `<button class="btn btn-danger" data-destroy><span style="font-size:1.5rem">💥</span>Destroy<br><small>Salvage 1 part</small></button>` +
         `<button class="btn btn-gold" data-board><span style="font-size:1.5rem">🚪</span>Board<br><small>Fight crew • big loot</small></button>` +
@@ -271,17 +320,15 @@
   }
 
   function shipDestroyed() {
-    const m = M(), save = S();
+    const m = M(), save = S(), c = ctx(m);
     SK.Combat.stop();
-    const e = $("#cb-enemy"); if (e) e.classList.add("dying");
+    const e = $("#cb-enemy-0"); if (e) e.classList.add("dying");
     save.stats.shipsDefeated++;
-    applyXP(SK.xpForKill(m.level, true));
+    applyXP(Math.round(SK.xpForKill(c.level, true) * m.tier.credMul));
+    addHaul(m);
     setTimeout(() => {
-      const item = SK.generateItem({ domain: "ship", level: m.level, focusSlot: m.opt.focusSlot, rareBoost: 2 });
-      showLoot(item, () => {
-        applyXP(30 + m.level * 4);
-        missionDone("💥", "Ship Destroyed", "You salvaged parts from the wreck of " + m.opt.shipName + ".");
-      });
+      const item = SK.generateItem({ domain: "ship", level: c.level, focusSlot: m.opt.focusSlot, rareBoost: 2 * c.rareMul });
+      showLoot(item, () => shipSectorDone("💥"));
     }, 350);
   }
 
@@ -293,46 +340,57 @@
     m.idx = 0;
     m.seq = [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }];
     UI.toast("Boarding " + m.opt.shipName + "…");
-    setScene("corridor"); // boarding happens on-foot inside the ship's corridors
+    setScene("corridor");
     setProgress(m.seq, 0);
     travel(boardEncounter);
   }
 
   function boardEncounter() {
-    const m = M(), save = S();
+    const m = M(), save = S(), c = ctx(m);
     const isBoss = m.seq[m.idx].type === "boss";
     if (m.idx > 0) m.player.hp = Math.min(m.player.maxHp, m.player.hp + Math.round(m.player.maxHp * 0.15));
     setProgress(m.seq, m.idx);
-    const enemies = buildParty("shipMinion", "shipBoss", m.level, isBoss);
+    const enemies = buildParty("shipMinion", "shipBoss", isBoss, c);
     SK.Combat.start({
       player: m.player, enemies,
       onEnd: (win) => {
         if (!win) return missionFail("Your boarding party was wiped out aboard " + m.opt.shipName + ".");
         save.stats.kills += enemies.length;
-        applyXP(partyXP(enemies, m.level));
-        const cs = SK.getCharStats(save);
+        applyXP(partyXP(enemies, m));
+        addHaul(m);
         const dom = isBoss ? "char" : Math.random() < 0.3 ? "ship" : "char";
         const item = SK.generateItem({
-          domain: dom, level: m.level + (isBoss ? 1 : 0),
+          domain: dom, level: c.level + (isBoss ? 1 : 0),
           focusSlot: dom === "ship" ? m.opt.focusSlot : undefined,
-          luck: cs.luck, rareBoost: isBoss ? 3 : 1.4,
+          luck: SK.getCharStats(save).luck, rareBoost: (isBoss ? 3 : 1.4) * c.rareMul,
         });
         showLoot(item, () => {
           refreshFootPlayer(m);
           m.idx++;
           if (m.idx >= m.seq.length) {
-            // captain's coffer — guaranteed ship part with a big rarity boost
             UI.toast("Captain's coffer found! 🎁", "gold");
-            const coffer = SK.generateItem({ domain: "ship", level: m.level + 1, focusSlot: m.opt.focusSlot, rareBoost: 3.5 });
-            showLoot(coffer, () => {
-              save.stats.shipsDefeated++;
-              applyXP(60 + m.level * 6);
-              missionDone("🏴‍☠️", "Ship Captured!", "You looted " + m.opt.shipName + " and cracked the captain's coffer.");
-            });
+            const coffer = SK.generateItem({ domain: "ship", level: c.level + 1, focusSlot: m.opt.focusSlot, rareBoost: 3.5 * c.rareMul });
+            showLoot(coffer, () => { save.stats.shipsDefeated++; shipSectorDone("🏴‍☠️"); });
           } else travel(boardEncounter);
         });
       },
     });
+  }
+
+  // after a ship sector (destroy salvage or full board) — extract or hunt deeper
+  function shipSectorDone(emoji) {
+    const m = M(), c = ctx(m);
+    depthChoice(emoji,
+      () => { // hunt deeper: a fresh, tougher pirate
+        m.depth++;
+        m.opt.vessel = SK.pick(SK.ENEMY_POOLS.ships);
+        m.opt.shipName = SK.pick(SK.PIRATE_SHIP_PREFIX) + " " + SK.pick(SK.PIRATE_SHIP_SUFFIX);
+        m.opt.focusSlot = SK.pick(Object.keys(SK.SHIP_SLOTS));
+        UI.toast("Hunting deeper — depth " + m.depth + "…");
+        shipSpacePhase();
+      },
+      () => { bankHaul(m); applyXP(25 + c.level * 4);
+        missionDone(emoji === "💥" ? "💥" : "🏴‍☠️", "Sector Cleared!", "Extracted after depth " + m.depth + "."); });
   }
 
   SK.Mission = { startPlanet, startShip };

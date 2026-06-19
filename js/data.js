@@ -137,4 +137,51 @@
     Barren:   { sky:["#08080e","#14141f","#26263a","#56607a"], ground:["#5a5a66","#3a3a44","#22222a"], path:["#aab0c0","#5a606e"], pathEdge:"#d8dde8", pathLine:"#2a2a36", mountain:"#4a4a5a", snow:"#cfd6e8", glow:"#7a9ac0", cap:["#aab8d0","#6a7a98","#3a4a66"], stem:"#cdd6e8", spot:"#e0e8f4", plant:["#5a6a88","#7a8aa8"], horizonGlow:"#8a9ab0" },
   };
   SK.PLANET_PALETTES.default = SK.PLANET_PALETTES.Jungle;
+
+  /* ===================================================================
+     BALANCE — central tuning for progression & difficulty
+     =================================================================== */
+  SK.BALANCE = {
+    // power-score weights (a single number summarising captain/ship strength)
+    powerW: { hp: 0.22, attack: 2, defense: 2, speed: 1.5, crit: 1.2, critDmg: 0.4, luck: 0.6 },
+    shipPowerW: { hull: 0.18, shield: 0.3, weapon: 2.2, targeting: 1.2, engine: 1.4 },
+    // gear-aware difficulty: effLevel = level + min(max,(powerFactor-1)*nudge)
+    gearNudge: 2.4,
+    gearNudgeMax: 9,
+    // equipment upgrades
+    upgradePerLevel: 0.10,   // +10% of base stats per upgrade level
+    upgradeMaxPlus: 5,
+    // set bonus: % to all char stats per equipped epic/legendary item
+    setBonusPerEpic: 0.025,
+    // salvage currency gained when selling loot, by rarity
+    scrapBySell: { common: 1, uncommon: 2, rare: 5, epic: 12, legendary: 28 },
+    // depth ("push deeper") ramp
+    depthEnemyMul: 0.13,     // +13% enemy stats per depth beyond 1
+    depthRareBonus: 0.45,    // +rarity boost per depth
+    haulCreditsPerEnc: 9,    // pending haul credits per cleared encounter (x level x tier x depth)
+    haulScrapPerEnc: 0.5,
+    affixDepthStep: 2,       // +1 affix every N depths
+  };
+
+  /* ---------------- Mission difficulty tiers ---------------- */
+  SK.TIERS = [
+    { key: "patrol",    name: "Patrol",    color: "#46e08a", dLevel: -1, enemyMul: 0.85, lootMul: 1.0, rare: 1,   credMul: 0.9, partyBonus: -1, affixes: 0 },
+    { key: "standard",  name: "Standard",  color: "#37e6ff", dLevel: 0,  enemyMul: 1.0,  lootMul: 1.0, rare: 1,   credMul: 1.0, partyBonus: 0,  affixes: 0 },
+    { key: "elite",     name: "Elite",     color: "#b46bff", dLevel: 2,  enemyMul: 1.3,  lootMul: 1.5, rare: 2,   credMul: 1.6, partyBonus: 1,  affixes: 1 },
+    { key: "nightmare", name: "Nightmare", color: "#ff5d6c", dLevel: 4,  enemyMul: 1.7,  lootMul: 2.2, rare: 3.5, credMul: 2.4, partyBonus: 1,  affixes: 2 },
+  ];
+  SK.TIER = {};
+  SK.TIERS.forEach((t) => { SK.TIER[t.key] = t; });
+
+  /* ---------------- Elite affixes (enemy modifiers) ---------------- */
+  SK.AFFIXES = {
+    shielded: { name: "Shielded", icon: "🔰", apply: (e) => { e.maxShield = e.shield = Math.round(e.maxHp * 0.45); } },
+    swift:    { name: "Swift",    icon: "💨", apply: (e) => { e.spd = Math.round(e.spd * 1.6) + 2; } },
+    armored:  { name: "Armored",  icon: "🧱", apply: (e) => { e.def = Math.round(e.def * 1.8) + 5; } },
+    fierce:   { name: "Fierce",   icon: "💢", apply: (e) => { e.atk = Math.round(e.atk * 1.35); } },
+    regen:    { name: "Regen",    icon: "♻️", apply: (e) => { e.regen = Math.max(1, Math.round(e.maxHp * 0.02)); } },
+    vampiric: { name: "Vampiric", icon: "🩸", apply: (e) => { e.lifesteal = 0.4; } },
+  };
+  SK.AFFIX_KEYS = Object.keys(SK.AFFIXES);
 })();
+

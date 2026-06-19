@@ -33,6 +33,7 @@
       level: 1,
       xp: 0,
       credits: 150,
+      scrap: 0,
       equipped: {
         char: { weapon: null, helmet: null, armor: null, gloves: null, boots: null, accessory: null },
         ship: { primary: null, shieldGen: null, hullPlate: null, engine: null, targeting: null, reactor: null },
@@ -78,6 +79,15 @@
   SK.ownedRobot = (save, id) => save.robotsOwned.find((r) => r.id === id);
 
   /* ---------------- Aggregate stats ---------------- */
+  // count of equipped char items that are epic or legendary (for the set bonus)
+  SK.epicCount = function (save) {
+    let n = 0;
+    for (const slot in save.equipped.char) {
+      const it = save.equipped.char[slot];
+      if (it && (it.rarity === "epic" || it.rarity === "legendary")) n++;
+    }
+    return n;
+  };
   SK.getCharStats = function (save) {
     const total = SK.baseCharStats(save.level);
     for (const slot in save.equipped.char) addStats(total, save.equipped.char[slot]?.stats);
@@ -85,12 +95,25 @@
       const inst = SK.ownedRobot(save, id);
       if (inst) addStats(total, SK.robotDef(inst.key)?.stats);
     }
+    const setBonus = SK.epicCount(save) * SK.BALANCE.setBonusPerEpic;
+    if (setBonus > 0) for (const k in total) total[k] = Math.round(total[k] * (1 + setBonus));
     return total;
   };
   SK.getShipStats = function (save) {
     const total = SK.baseShipStats(save.level);
     for (const slot in save.equipped.ship) addStats(total, save.equipped.ship[slot]?.stats);
     return total;
+  };
+
+  /* ---------------- Power score & gear-aware effective level ---------------- */
+  function weighted(stats, w) { let p = 0; for (const k in w) p += (stats[k] || 0) * w[k]; return p; }
+  SK.charPower = (save) => Math.round(weighted(SK.getCharStats(save), SK.BALANCE.powerW));
+  SK.shipPower = (save) => Math.round(weighted(SK.getShipStats(save), SK.BALANCE.shipPowerW));
+  SK.basePower = (level) => weighted(SK.baseCharStats(level), SK.BALANCE.powerW);
+  SK.effectiveLevel = function (save) {
+    const factor = SK.charPower(save) / Math.max(1, SK.basePower(save.level));
+    const nudge = Math.min(SK.BALANCE.gearNudgeMax, Math.max(0, (factor - 1) * SK.BALANCE.gearNudge));
+    return save.level + Math.round(nudge);
   };
 
   /* ---------------- Rarity roll ---------------- */
@@ -161,8 +184,35 @@
       icon: def.icon,
       name: buildName(def, rarity),
       stats,
+      plus: 0,
+      _base: { ...stats },
       value: Math.max(1, Math.round(8 * rar.valueMult * levelScale)),
     };
+  };
+
+  /* ---------------- Equipment upgrades (credits + scrap) ---------------- */
+  SK.upgradeCost = function (item) {
+    const r = SK.RARITY_ORDER.indexOf(item.rarity) + 1;
+    const plus = item.plus || 0;
+    return {
+      credits: Math.round(item.value * 1.2 * (plus + 1) * (1 + r * 0.3)) + 15,
+      scrap: Math.round(r * (plus + 1) * 0.8) + 1,
+    };
+  };
+  SK.canUpgrade = (item) => (item.plus || 0) < SK.BALANCE.upgradeMaxPlus;
+  SK.upgradeItem = function (save, item) {
+    if (!SK.canUpgrade(item)) return false;
+    const c = SK.upgradeCost(item);
+    if (save.credits < c.credits || (save.scrap || 0) < c.scrap) return false;
+    save.credits -= c.credits; save.scrap -= c.scrap;
+    if (!item._base) item._base = { ...item.stats };
+    item.plus = (item.plus || 0) + 1;
+    const f = 1 + item.plus * SK.BALANCE.upgradePerLevel;
+    const ns = {};
+    for (const k in item._base) ns[k] = Math.max(1, Math.round(item._base[k] * f));
+    item.stats = ns;
+    SK.save();
+    return true;
   };
 
   /* ---------------- Stat delta (for loot cards) ---------------- */
@@ -198,8 +248,10 @@
   SK.sellItem = function (save, item) {
     removeFromInventory(save, item.id);
     save.credits += item.value;
+    const scrap = SK.BALANCE.scrapBySell[item.rarity] || 1;
+    save.scrap = (save.scrap || 0) + scrap;
     SK.save();
-    return item.value;
+    return { credits: item.value, scrap };
   };
 
   SK.unequip = function (save, domain, slot) {
@@ -254,17 +306,30 @@
     const atkMult = isBoss ? 1.05 : 0.8;
     const defMult = isBoss ? 1.1 : 0.7;
     const scale = opts.scale || 1; // party members are scaled down a touch for fairness
+    const mul = opts.mul || 1;     // tier/depth difficulty multiplier
+    const atkF = scale * (0.4 + 0.6 * mul); // soften attack vs hp so high tiers don't one-shot
     return {
-      side: "enemy", name: tpl.name, icon: tpl.icon, isBoss,
+      side: "enemy", name: tpl.name, icon: tpl.icon, isBoss, affixes: [],
       sprite: SK.spritePath(SK.ENEMY_FOLDER[type] || "planet", tpl.name),
-      maxHp: Math.round((90 + level * 26) * hpMult * scale),
-      hp: Math.round((90 + level * 26) * hpMult * scale),
-      atk: Math.round((10 + level * 2.6) * atkMult * scale),
-      def: Math.round((3 + level * 1.3) * defMult),
+      maxHp: Math.round((90 + level * 26) * hpMult * scale * mul),
+      hp: Math.round((90 + level * 26) * hpMult * scale * mul),
+      atk: Math.round((10 + level * 2.6) * atkMult * atkF),
+      def: Math.round((3 + level * 1.3) * defMult * (0.6 + 0.4 * mul)),
       spd: isBoss ? 9 : 7 + randInt(0, 4),
       critPct: isBoss ? 10 : 5, critDmgPct: 50,
       evasionPct: isBoss ? 5 : 0, shield: 0, maxShield: 0,
     };
+  };
+
+  // apply N random affixes to an enemy (returns the keys)
+  SK.applyAffixes = function (e, count) {
+    if (!count || count <= 0) return;
+    const keys = SK.AFFIX_KEYS.slice();
+    for (let i = 0; i < count && keys.length; i++) {
+      const k = keys.splice(Math.floor(Math.random() * keys.length), 1)[0];
+      SK.AFFIXES[k].apply(e);
+      e.affixes.push(k);
+    }
   };
 
   SK.makePlayerShip = function (save) {
@@ -281,12 +346,13 @@
   SK.makeEnemyShip = function (opts) {
     const level = opts.level;
     const engine = 8 + randInt(0, 3);
+    const mul = opts.mul || 1;
     return {
-      side: "enemy", isShip: true, name: opts.name, icon: opts.icon,
+      side: "enemy", isShip: true, name: opts.name, icon: opts.icon, affixes: [],
       sprite: SK.spritePath("ships", opts.sprite || opts.name),
-      maxHp: Math.round(160 + level * 24), hp: Math.round(160 + level * 24),
-      shield: Math.round(36 + level * 7), maxShield: Math.round(36 + level * 7),
-      atk: Math.round(9 + level * 2), def: 0, spd: engine,
+      maxHp: Math.round((160 + level * 24) * mul), hp: Math.round((160 + level * 24) * mul),
+      shield: Math.round((36 + level * 7) * mul), maxShield: Math.round((36 + level * 7) * mul),
+      atk: Math.round((9 + level * 2) * (0.5 + 0.5 * mul)), def: 0, spd: engine,
       critPct: 6, critDmgPct: 50,
       evasionPct: Math.min(28, (engine / (engine + 60)) * 100),
     };

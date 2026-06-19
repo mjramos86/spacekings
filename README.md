@@ -57,10 +57,18 @@ decisions.
 stats and more bonus stats. Bosses, boarding, and coffers have boosted odds for
 the top tiers. Your **Luck** stat improves drop quality.
 
-### Progression
+### Progression & difficulty
 
-You gain **XP and levels** that permanently raise your base stats, but
-**equipment does the heavy lifting** — gear up to beat the bosses.
+- **XP & levels** raise your base stats; **equipment does the heavy lifting**.
+- **Power Score** — a single number (on the Captain/Ship sheets) summarising your strength.
+- **Upgrades** — spend **credits + ⚙️ scrap** (scrap is earned by selling loot) to upgrade an item up to **+5**, so you can improve a favourite instead of praying for drops.
+- **Set bonus** — each equipped **epic/legendary** item grants +2.5% to all your stats.
+- **Mission tiers** — every mission offers **Patrol / Standard / Elite / Nightmare** options: higher tiers mean tougher enemies (and **elite affixes** like Shielded, Swift, Regen, Vampiric…) but better loot, more rarity, and bigger rewards.
+- **Push deeper** — after clearing a sector you can **Extract** (bank your haul) or **Descend** for richer loot at rising threat. Fall and the *pending haul* is lost — your equipped/sold gear is always kept. Depth is the endless difficulty ramp.
+
+Tuning lives in one place — `SK.BALANCE` / `SK.TIERS` / `SK.AFFIXES` in
+`js/data.js`. Run `node tools/balance-sim.js` to estimate tier win-rates
+after any change.
 
 ---
 

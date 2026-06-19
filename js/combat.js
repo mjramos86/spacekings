@@ -69,9 +69,12 @@
         const bars =
           (e.maxShield > 0 ? `<div class="hpbar"><div class="sh-fill" id="cb-e-sh-${i}"></div></div>` : "") +
           `<div class="hpbar"><div class="hp-fill" id="cb-e-hp-${i}"></div><div class="hp-text" id="cb-e-ht-${i}"></div></div>`;
+        const affixes = e.affixes && e.affixes.length
+          ? `<div class="affixes">${e.affixes.map((k) => (SK.AFFIXES[k] || {}).icon || "").join(" ")}</div>` : "";
         return `<div class="enemy-stack" id="cb-stack-${i}">` +
           (e.isBoss ? `<div class="boss-tag">◆ BOSS ◆</div>` : "") +
           (showName ? `<div class="combatant-name">${e.name}</div>` : "") +
+          affixes +
           bars +
           `<div class="enemy-sprite ${cls}" id="cb-enemy-${i}">` +
             `<span class="enemy-emoji">${e.icon}</span>` +
@@ -185,6 +188,16 @@
       if (dmg > 0) {
         def.hp -= dmg;
         this._float(defEl, dmg + (crit ? "!" : ""), crit ? "crit" : side === "player" ? "player" : "enemy");
+      }
+      // enemy affix self-heal (vampiric / regen) when an enemy attacks
+      if (side === "enemy") {
+        let heal = 0;
+        if (atk.lifesteal && dmg > 0) heal += Math.round(dmg * atk.lifesteal);
+        if (atk.regen) heal += atk.regen;
+        if (heal > 0 && atk.hp > 0) {
+          atk.hp = Math.min(atk.maxHp, atk.hp + heal);
+          this._float($("#cb-enemy-" + idx), "+" + heal, "heal");
+        }
       }
       // enemy died?
       if (side === "player" && def.hp <= 0 && !def._dead) {
