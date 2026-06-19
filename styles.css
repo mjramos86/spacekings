@@ -344,8 +344,6 @@ button,input{font-family:inherit;}
 .corridor-bg{width:100%; height:100%; display:block;}
 .cor-alarm{animation:cor-alarm 1.8s ease-in-out infinite;}
 @keyframes cor-alarm{0%,100%{opacity:.4}50%{opacity:1}}
-.ps-ufo{transform-box:fill-box; transform-origin:center; animation:ps-ufo 7s ease-in-out infinite;}
-@keyframes ps-ufo{0%,100%{transform:translate(0,0)}50%{transform:translate(-14px,-10px)}}
 .ps-flora{transform-box:fill-box; transform-origin:bottom center; animation:ps-sway 5s ease-in-out infinite;}
 .ps-flora:nth-of-type(3){animation-delay:.8s;} .ps-flora:nth-of-type(5){animation-delay:1.4s;}
 @keyframes ps-sway{0%,100%{transform:rotate(0deg)}50%{transform:rotate(1.6deg)}}
@@ -377,7 +375,7 @@ button,input{font-family:inherit;}
 /* on-foot: enemy stands ON the road (feet anchored low), name/HP float above it */
 .run-scene.planet #combat-view .enemy-row,.run-scene.corridor #combat-view .enemy-row{position:absolute; left:0; right:0; bottom:28%;}
 .run-scene.planet .run-progress,.run-scene.corridor .run-progress{z-index:8;}
-@media (prefers-reduced-motion: reduce){ .ps-ufo,.ps-flora,.fp-gun-inner,.fp-flash,.cor-alarm{animation:none;} }
+@media (prefers-reduced-motion: reduce){ .ps-flora,.fp-gun-inner,.fp-flash,.cor-alarm{animation:none;} }
 
 .run-progress{position:absolute; top:10px; left:0; right:0; display:flex; gap:8px; justify-content:center; z-index:5;
   padding-top:env(safe-area-inset-top);}

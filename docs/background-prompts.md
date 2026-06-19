@@ -26,7 +26,8 @@ enemy sprites.
 **Negative prompt (if your tool supports one):**
 ```
 text, words, logo, watermark, UI, HUD, health bar, people, character, creature,
-spaceship, vehicle, weapon, hands, blurry, jpeg artifacts, photorealistic, 3D render
+spaceship, vehicle, weapon, hands, UFO, flying saucer, blurry, jpeg artifacts,
+photorealistic, 3D render
 ```
 
 ---
@@ -35,8 +36,8 @@ spaceship, vehicle, weapon, hands, blurry, jpeg artifacts, photorealistic, 3D re
 
 ### Jungle — `jungle`
 ```
-Alien jungle world at night, first-person ground-level view. Deep blue starry sky with
-a faint colorful holographic UFO; jagged snow-capped mountains on the horizon; lush
+Alien jungle world at night, first-person ground-level view. Deep blue starry sky;
+jagged snow-capped mountains on the horizon; lush
 teal-and-green alien undergrowth; glowing violet bioluminescent mushrooms dotting both
 sides; a glowing cyan crystalline stone path running from the foreground to the horizon
 near the middle; lower third and bottom-center kept open. Palette: deep blue sky,
