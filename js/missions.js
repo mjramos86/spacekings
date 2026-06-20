@@ -34,6 +34,17 @@
       SK.UI.fpGunSVG(S().appearance && S().appearance.skin) + "</div>";
   }
 
+  // Layer a background image over a scene's drawn fallback; if the file is
+  // missing the <img> removes itself and the SVG/CSS scene shows through.
+  function sceneBg(sel, path) {
+    const el = $(sel); if (!el) return;
+    el.querySelectorAll(".scene-bg").forEach((n) => n.remove());
+    const img = document.createElement("img");
+    img.className = "scene-bg"; img.alt = ""; img.src = path;
+    img.onerror = function () { this.remove(); };
+    el.appendChild(img);
+  }
+
   function setProgress(seq, idx) {
     $("#run-progress").innerHTML = seq.map((e, i) => {
       const cls = ["prog-dot"];
@@ -214,6 +225,7 @@
     showRun();
     $(".planet-scene").innerHTML = SK.UI.planetSceneSVG(SK.PLANET_PALETTES[opt.biome.name] || SK.PLANET_PALETTES.default);
     setScene("planet");
+    sceneBg(".planet-scene", "assets/backgrounds/planet-" + SK.slugify(opt.biome.name) + ".png");
     setProgress(M().seq, 0);
     travel(planetEncounter);
   }
@@ -291,6 +303,7 @@
     const m = M(), save = S(), c = ctx(m);
     m.phase = "space";
     setScene("space");
+    sceneBg(".run-stars", "assets/backgrounds/space-" + SK.slugify(m.opt.vessel.name) + ".png");
     setProgress([{ type: "boss" }], 0);
     const player = SK.makePlayerShip(save);
     const enemy = SK.makeEnemyShip({ level: c.level, name: m.opt.shipName, icon: m.opt.vessel.icon, sprite: m.opt.vessel.name, mul: c.mul });
@@ -341,6 +354,7 @@
     m.seq = [{ type: "minion" }, { type: "minion" }, { type: "minion" }, { type: "boss" }];
     UI.toast("Boarding " + m.opt.shipName + "…");
     setScene("corridor");
+    sceneBg(".corridor-scene", "assets/backgrounds/corridor-" + SK.slugify(m.opt.vessel.name) + ".png");
     setProgress(m.seq, 0);
     travel(boardEncounter);
   }

@@ -340,6 +340,8 @@ button,input{font-family:inherit;}
 .planet-bg{width:100%; height:100%; display:block;}
 .corridor-scene{position:absolute; inset:0; overflow:hidden; display:none; z-index:0;}
 .run-scene.corridor .corridor-scene{display:block;}
+/* generated background image layered over the drawn scene (fallback = the SVG/CSS scene) */
+.scene-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; pointer-events:none;}
 .run-scene.corridor .run-floor,.run-scene.corridor .run-ceiling{display:none;}
 .corridor-bg{width:100%; height:100%; display:block;}
 .cor-alarm{animation:cor-alarm 1.8s ease-in-out infinite;}
