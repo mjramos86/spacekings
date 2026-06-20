@@ -77,6 +77,30 @@ for (const lvl of [1, 5, 10, 20, 40]) {
   console.log("  L" + String(lvl).padEnd(5) + " " + String(base).padEnd(7) + " " + cells.join(" "));
 }
 
+// attach a 3-bot team to a save (instances only store {id,key}; stats read live)
+function withRobots(sv, keys) {
+  const s = clone(sv); s.robotsOwned = []; s.robotTeam = [];
+  keys.forEach((k, i) => { const id = "r" + i; s.robotsOwned.push({ id, key: k }); s.robotTeam.push(id); });
+  return s;
+}
+console.log("\n== ROBOT TEAM CONTRIBUTION (full 3-bot team, atop rare gear) ==\n");
+console.log("  Robots are flat (don't scale), so impact fades as level grows.\n");
+for (const lvl of [5, 15, 30]) {
+  const base = geared(lvl, "rare");
+  const teams = [
+    ["no robots", []],
+    ["early (scout/gunner/guard)", ["scout", "gunner", "guard"]],
+    ["top DPS (omega/titan/striker)", ["omega", "titan", "striker"]],
+  ];
+  const bp = SK.charPower(base);
+  console.log("  L" + lvl + " (gear-only power " + bp + ")");
+  for (const [name, keys] of teams) {
+    const sv = keys.length ? withRobots(base, keys) : base;
+    const p = SK.charPower(sv);
+    console.log("    " + name.padEnd(30) + " power " + String(p).padStart(4) + "  (+" + Math.round((p / bp - 1) * 100) + "%)");
+  }
+}
+
 console.log("\n== TIER WIN-RATES (boss + 2 escorts), by captain gear ==\n");
 const cases = [
   ["L1 naked", naked(1)],

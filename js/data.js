@@ -104,15 +104,20 @@
 
   /* ---------------- Robots ---------------- */
   // Robots assist during on-foot (character) combat by adding their stats.
+  // Stats are read live from this catalog (instances only store {id,key}), so
+  // tuning here applies to every owned robot retroactively. Kept small (in line
+  // with the nerfed gear scale) so a full 3-bot team is a modest boost, not a
+  // power spike — they don't scale with level, so they're an early/mid leg-up
+  // that naturally fades as base stats grow.
   SK.ROBOT_CATALOG = [
-    { key: "scout",  name: "Scout Bot",  icon: "🛰️", rarity: "common",    cost: 120,  stats: { speed: 6, hp: 30 } },
-    { key: "gunner", name: "Gunner Bot", icon: "🔫", rarity: "uncommon",  cost: 320,  stats: { attack: 10, crit: 4 } },
-    { key: "guard",  name: "Guard Bot",  icon: "🛡️", rarity: "uncommon",  cost: 340,  stats: { defense: 10, hp: 60 } },
-    { key: "medic",  name: "Medic Bot",  icon: "💉", rarity: "rare",      cost: 700,  stats: { hp: 160, defense: 6 } },
-    { key: "striker",name: "Striker Bot",icon: "⚡", rarity: "rare",      cost: 760,  stats: { attack: 18, critDmg: 30 } },
-    { key: "lucky",  name: "Lucky Bot",  icon: "🍀", rarity: "epic",      cost: 1500, stats: { luck: 14, crit: 8 } },
-    { key: "titan",  name: "Titan Bot",  icon: "🤖", rarity: "epic",      cost: 1900, stats: { attack: 16, defense: 14, hp: 120 } },
-    { key: "omega",  name: "Omega Unit", icon: "🔱", rarity: "legendary", cost: 4200, stats: { attack: 28, defense: 18, hp: 220, crit: 8, critDmg: 40 } },
+    { key: "scout",  name: "Scout Bot",  icon: "🛰️", rarity: "common",    cost: 120,  stats: { speed: 4, hp: 18 } },
+    { key: "gunner", name: "Gunner Bot", icon: "🔫", rarity: "uncommon",  cost: 320,  stats: { attack: 4, crit: 2 } },
+    { key: "guard",  name: "Guard Bot",  icon: "🛡️", rarity: "uncommon",  cost: 340,  stats: { defense: 5, hp: 28 } },
+    { key: "medic",  name: "Medic Bot",  icon: "💉", rarity: "rare",      cost: 700,  stats: { hp: 70, defense: 4 } },
+    { key: "striker",name: "Striker Bot",icon: "⚡", rarity: "rare",      cost: 760,  stats: { attack: 7, critDmg: 16 } },
+    { key: "lucky",  name: "Lucky Bot",  icon: "🍀", rarity: "epic",      cost: 1500, stats: { luck: 8, crit: 4 } },
+    { key: "titan",  name: "Titan Bot",  icon: "🤖", rarity: "epic",      cost: 1900, stats: { attack: 6, defense: 6, hp: 55 } },
+    { key: "omega",  name: "Omega Unit", icon: "🔱", rarity: "legendary", cost: 4200, stats: { attack: 8, defense: 7, hp: 90, crit: 4, critDmg: 20 } },
   ];
   SK.ROBOT_TEAM_SIZE = 3;
 
