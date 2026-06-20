@@ -51,15 +51,16 @@
       const hasBoss = enemies.some((e) => e.isBoss);
       // size custom-properties tuned so 1-3 enemies fit the row on any width
       // each sprite fits an object-fit box: height (rem) x width min(vw,px)
+      // enemies rendered 100% bigger, bosses 200% bigger (×2 / ×3 on both axes)
       let es, mw, bs = "", bmw = "";
-      if (isShip) { es = "16rem"; mw = "min(72vw,380px)"; }
+      if (isShip) { es = "32rem"; mw = "min(144vw,760px)"; }
       else if (hasBoss) {
-        bs = n >= 3 ? "13rem" : n === 2 ? "15rem" : "16.5rem";
-        bmw = n >= 3 ? "min(40vw,210px)" : n === 2 ? "min(50vw,260px)" : "min(66vw,340px)";
-        es = "9rem"; mw = "min(28vw,150px)";
+        bs = n >= 3 ? "39rem" : n === 2 ? "45rem" : "49.5rem";
+        bmw = n >= 3 ? "min(120vw,630px)" : n === 2 ? "min(150vw,780px)" : "min(198vw,1020px)";
+        es = "18rem"; mw = "min(56vw,300px)";
       } else {
-        es = n >= 3 ? "9.5rem" : n === 2 ? "10.5rem" : "12rem";
-        mw = n >= 3 ? "min(28vw,150px)" : n === 2 ? "min(42vw,220px)" : "min(60vw,320px)";
+        es = n >= 3 ? "19rem" : n === 2 ? "21rem" : "24rem";
+        mw = n >= 3 ? "min(56vw,300px)" : n === 2 ? "min(84vw,440px)" : "min(120vw,640px)";
       }
       const rowStyle = `--es:${es};--mw:${mw};` + (bs ? `--bs:${bs};--bmw:${bmw};` : "");
 

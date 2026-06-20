@@ -412,14 +412,14 @@ button,input{font-family:inherit;}
 .enemy-stack.dead{opacity:.16; transition:opacity .45s ease;}
 .enemy-row .combatant-name{font-size:.8rem;}
 .enemy-row .enemy-stack .hpbar{width:clamp(56px,80%,210px); height:13px;}
-.enemy-sprite{font-size:var(--es,9rem); filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
+.enemy-sprite{font-size:var(--es,18rem); filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
 .enemy-emoji{display:inline-block;}
-.enemy-img{display:none; height:var(--es,12rem); width:var(--mw,60vw); object-fit:contain; object-position:50% 100%; image-rendering:pixelated; image-rendering:crisp-edges; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
-.enemy-sprite.boss .enemy-img{height:var(--bs,16.5rem); width:var(--bmw,66vw);}
-.enemy-sprite.ship .enemy-img{height:var(--es,16rem); width:var(--mw,72vw);}
+.enemy-img{display:none; height:var(--es,24rem); width:var(--mw,120vw); object-fit:contain; object-position:50% 100%; image-rendering:pixelated; image-rendering:crisp-edges; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
+.enemy-sprite.boss .enemy-img{height:var(--bs,49.5rem); width:var(--bmw,198vw);}
+.enemy-sprite.ship .enemy-img{height:var(--es,32rem); width:var(--mw,144vw);}
 .enemy-sprite.hasimg .enemy-emoji{display:none;}
 .enemy-sprite.hasimg .enemy-img{display:block;}
-.enemy-sprite.boss{font-size:var(--bs,12rem); animation:bossidle 2s ease-in-out infinite;}
+.enemy-sprite.boss{font-size:var(--bs,36rem); animation:bossidle 2s ease-in-out infinite;}
 @keyframes enemyidle{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes bossidle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}
 .enemy-sprite.hit{animation:hitshake .28s;}
