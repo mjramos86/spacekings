@@ -29,9 +29,17 @@
     if (el && !el.firstChild) el.innerHTML = SK.UI.corridorSceneSVG();
   }
   function ensureGun() {
-    $("#fp-gun").innerHTML =
-      '<div class="fp-gun-inner"><div id="fp-laser" class="fp-laser"></div><div id="fp-flash" class="fp-flash"></div>' +
-      SK.UI.fpGunSVG(S().appearance && S().appearance.skin) + "</div>";
+    const g = $("#fp-gun");
+    g.classList.remove("img-art");
+    g.innerHTML =
+      '<div class="fp-gun-inner"><div class="fp-laser"></div><div class="fp-flash"></div>' +
+      '<img class="fp-gun-img" alt="" src="assets/inventory/in-game/defaultgun.png"></div>';
+    const img = g.querySelector(".fp-gun-img");
+    img.onload = () => g.classList.add("img-art");
+    img.onerror = () => {
+      g.classList.remove("img-art");
+      img.outerHTML = SK.UI.fpGunSVG(S().appearance && S().appearance.skin);
+    };
   }
 
   // Layer a background image over a scene's drawn fallback; if the file is

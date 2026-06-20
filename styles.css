@@ -370,6 +370,14 @@ button,input{font-family:inherit;}
 .fp-gun.fire .fp-flash{animation:fp-flash .22s ease-out;}
 @keyframes fp-flash{0%{opacity:0; transform:translate(-50%,50%) scale(.2)}30%{opacity:1; transform:translate(-50%,50%) scale(1)}100%{opacity:0; transform:translate(-50%,50%) scale(1.35)}}
 
+/* image-based gun sprite (pre-angled art, replaces the rotated SVG box) */
+.fp-gun.img-art{right:0; bottom:0; width:min(50%,210px); transform:none;}
+.fp-gun-img{display:block; width:100%; height:auto; filter:drop-shadow(0 -3px 12px rgba(0,0,0,.45)); image-rendering:pixelated;}
+.fp-gun.img-art.fire{animation:fp-recoil-img .18s ease;}
+@keyframes fp-recoil-img{0%{transform:translateY(0)}45%{transform:translateY(16px)}100%{transform:translateY(0)}}
+.fp-gun.img-art .fp-laser{left:22%; bottom:97%;}
+.fp-gun.img-art .fp-flash{left:22%; bottom:97%;}
+
 /* planet-mode combat HUD: hide the emoji weapon, lift the player bar to a top HUD */
 .run-scene.planet #combat-view .player-weapon,.run-scene.corridor #combat-view .player-weapon{display:none;}
 .run-scene.planet #combat-view .player-area,.run-scene.corridor #combat-view .player-area{position:absolute; left:0; right:0; top:0; bottom:auto;
