@@ -24,6 +24,10 @@
   SK.state = { save: null, mission: null };
   SK.save = function () { if (SK.state.save) SK.Storage.save(SK.state.save); };
 
+  // Bumped whenever gear stat formulas change so existing saves get recalibrated
+  // once (see SK.recalibrateSave). v2 = the "slow progression" equipment nerf.
+  SK.BALANCE_VER = 2;
+
   /* ---------------- New save ---------------- */
   SK.newSave = function (name, appearance) {
     return {
@@ -43,6 +47,7 @@
       robotTeam: [],
       shop: { char: [], ship: [], robots: [], stockLevel: 1, refreshedAt: 0 },
       stats: { planetsCleared: 0, shipsDefeated: 0, boarded: 0, kills: 0 },
+      balanceVer: SK.BALANCE_VER,
       createdAt: Date.now(),
     };
   };
@@ -156,7 +161,7 @@
     const def = slots[slotKey];
     const rarity = opts.rarity || SK.rollRarity(opts.luck || 0, opts.rareBoost || 1);
     const rar = SK.RARITIES[rarity];
-    const levelScale = 1 + (level - 1) * 0.07;
+    const levelScale = 1 + (level - 1) * SK.BALANCE.gearLevelScale;
     const variance = () => 0.85 + rand() * 0.3;
 
     const stats = {};
@@ -213,6 +218,51 @@
     item.stats = ns;
     SK.save();
     return true;
+  };
+
+  /* ---------------- Balance migration (recalibrate old gear) ---------------- */
+  // Recompute one item's stats from the current formula, preserving its stat
+  // identity (which stats it has) and its +upgrade level. Mirrors the magnitude
+  // math in generateItem at an average roll (variance = 1).
+  SK.recalibrateItem = function (item) {
+    if (!item) return;
+    const slots = item.domain === "ship" ? SK.SHIP_SLOTS : SK.CHAR_SLOTS;
+    const unit = item.domain === "ship" ? SK.SHIP_STAT_UNIT : SK.CHAR_STAT_UNIT;
+    const def = slots[item.slot];
+    if (!def) return;
+    const rar = SK.RARITIES[item.rarity] || SK.RARITIES.common;
+    const level = item.level || 1;
+    const levelScale = 1 + (level - 1) * SK.BALANCE.gearLevelScale;
+    const keys = Object.keys(item._base || item.stats || {});
+    const base = {};
+    for (const k of keys) {
+      if (!unit[k]) continue;
+      const factor = k === def.primary ? 1 : 0.4;
+      base[k] = Math.max(1, Math.round(unit[k] * levelScale * rar.statMult * factor));
+    }
+    item._base = base;
+    const f = 1 + (item.plus || 0) * SK.BALANCE.upgradePerLevel;
+    const ns = {};
+    for (const k in base) ns[k] = Math.max(1, Math.round(base[k] * f));
+    item.stats = ns;
+    item.value = Math.max(1, Math.round(8 * rar.valueMult * levelScale));
+  };
+
+  // Run once per save when the balance version changes: recalibrate every owned
+  // and equipped item so existing characters feel the rebalance. Returns the
+  // number of items touched (0 if the save is already current).
+  SK.recalibrateSave = function (save) {
+    if (!save || save.balanceVer === SK.BALANCE_VER) return 0;
+    let n = 0;
+    for (const domain of ["char", "ship"]) {
+      const eq = save.equipped && save.equipped[domain];
+      for (const slot in eq) if (eq[slot]) { SK.recalibrateItem(eq[slot]); n++; }
+    }
+    (save.inventory || []).forEach((it) => { SK.recalibrateItem(it); n++; });
+    // shop stock too, so freshly-bought items match the new balance
+    if (save.shop) for (const k of ["char", "ship"]) (save.shop[k] || []).forEach((it) => { SK.recalibrateItem(it); n++; });
+    save.balanceVer = SK.BALANCE_VER;
+    return n;
   };
 
   /* ---------------- Stat delta (for loot cards) ---------------- */

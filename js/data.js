@@ -152,6 +152,7 @@
     // equipment upgrades
     upgradePerLevel: 0.05,   // +5% of base stats per upgrade level (+25% at max)
     upgradeMaxPlus: 5,
+    gearLevelScale: 0.07,    // generated gear grows +7% per item level
     // set bonus: % to all char stats per equipped epic/legendary item
     setBonusPerEpic: 0.015,
     // salvage currency gained when selling loot, by rarity

@@ -28,7 +28,10 @@
       existing.robotTeam = existing.robotTeam || [];
       existing.stats = existing.stats || { planetsCleared: 0, shipsDefeated: 0, boarded: 0, kills: 0 };
       if (existing.scrap == null) existing.scrap = 0;
+      // one-time gear recalibration when the balance version changes
+      const recal = SK.recalibrateSave(existing);
       SK.state.save = existing;
+      if (recal > 0) { SK.Storage.save(existing); UI.toast("Gear recalibrated to new balance", "level"); }
       enterHub(false);
     } else {
       pendingName = name;
