@@ -53,22 +53,83 @@ function bossParty(level, mul, aff) {
   return [SK.makeEnemyCombatant({ type: "planetMinion", level, scale: 0.45, mul }), boss,
           SK.makeEnemyCombatant({ type: "planetMinion", level, scale: 0.45, mul })];
 }
+// a regular (non-boss) minion encounter of N enemies, mirroring missions.buildParty
+function minionParty(level, mul, size, aff) {
+  const scale = size === 3 ? 0.78 : size === 2 ? 0.9 : 1;
+  const party = [];
+  for (let i = 0; i < size; i++) party.push(SK.makeEnemyCombatant({ type: "planetMinion", level, scale, mul }));
+  if (aff) SK.applyAffixes(party[0], aff);
+  return party;
+}
 
-console.log("Tier win-rates (boss + 2 escorts), by captain gear:\n");
+// naked save (level only, no gear) — the baseline power that gear sits on top of
+function naked(level) { const sv = SK.newSave("n", ap); sv.level = level; return sv; }
+
+console.log("== GEAR CONTRIBUTION (how much full gear adds over naked, by rarity) ==\n");
+console.log("  A 'serious nerf' means each rarity is a modest %, not a doubling.\n");
+console.log("  level   naked   common   uncommon   rare    epic    legendary");
+for (const lvl of [1, 5, 10, 20, 40]) {
+  const base = SK.charPower(naked(lvl));
+  const cells = ["common", "uncommon", "rare", "epic", "legendary"].map((r) => {
+    const p = SK.charPower(geared(lvl, r));
+    return (p + " (+" + Math.round((p / base - 1) * 100) + "%)").padEnd(11);
+  });
+  console.log("  L" + String(lvl).padEnd(5) + " " + String(base).padEnd(7) + " " + cells.join(" "));
+}
+
+console.log("\n== TIER WIN-RATES (boss + 2 escorts), by captain gear ==\n");
 const cases = [
-  ["L1 +3 uncommon", geared(1, "uncommon", ["weapon", "helmet", "armor"])],
+  ["L1 naked", naked(1)],
+  ["L1 +3 common", geared(1, "common", ["weapon", "helmet", "armor"])],
   ["L4 uncommon", geared(4, "uncommon")],
-  ["L6 rare", geared(6, "rare")],
-  ["L10 epic", geared(10, "epic")],
+  ["L8 rare", geared(8, "rare")],
+  ["L15 epic", geared(15, "epic")],
+  ["L25 legendary", geared(25, "legendary")],
 ];
+console.log("  " + "case".padEnd(16) + "power   " + SK.TIERS.map((t) => t.name).join("  "));
 for (const [name, sv] of cases) {
   const P = SK.makePlayerCombatant(sv);
-  const out = SK.TIERS.map((t) => t.name[0] + ":" + String(rate(P, () => bossParty(Math.max(1, sv.level + t.dLevel), t.enemyMul, t.affixes))).padStart(3) + "%");
-  console.log("  " + name.padEnd(16) + " power " + String(SK.charPower(sv)).padStart(4) + "  " + out.join("  "));
+  const out = SK.TIERS.map((t) => (rate(P, () => bossParty(Math.max(1, sv.level + t.dLevel), t.enemyMul, t.affixes)) + "%").padStart(t.name.length));
+  console.log("  " + name.padEnd(16) + String(SK.charPower(sv)).padStart(4) + "    " + out.join("  "));
 }
-console.log("\nDepth ramp (L6 rare, Standard tier):");
+
+console.log("\n== OPENING: can a fresh player earn their first gear? (minion encounters) ==");
 {
-  const sv = geared(6, "rare"), P = SK.makePlayerCombatant(sv), B = SK.BALANCE;
-  const out = [1, 3, 5, 7, 9].map((d) => "d" + d + ":" + rate(P, () => bossParty(6 + d - 1, 1.0 * (1 + (d - 1) * B.depthEnemyMul), Math.min(3, Math.floor((d - 1) / B.affixDepthStep)))) + "%");
-  console.log("  " + out.join("  "));
+  const rows = [
+    ["L1 naked", naked(1)],
+    ["L1 +1 common", geared(1, "common", ["weapon"])],
+    ["L2 +2 common", (() => { const s = geared(2, "common", ["weapon", "armor"]); return s; })()],
+  ];
+  for (const [name, sv] of rows) {
+    const P = SK.makePlayerCombatant(sv);
+    const single = rate(P, () => minionParty(sv.level, 0.85, 1, 0));   // Patrol single
+    const pair   = rate(P, () => minionParty(sv.level, 0.85, 2, 0));   // Patrol pair
+    const trio   = rate(P, () => minionParty(sv.level, 1.0, 3, 0));    // Standard trio
+    console.log("  " + name.padEnd(14) + " Patrol 1:" + (single + "%").padStart(4) + "  Patrol 2:" + (pair + "%").padStart(4) + "  Standard 3:" + (trio + "%").padStart(4));
+  }
+}
+
+console.log("\n== DEPTH RAMP (endless endgame; boss-party, Standard tier) ==");
+{
+  const B = SK.BALANCE;
+  const depthRow = (sv) => [1, 4, 8, 12, 16, 20].map((d) =>
+    "d" + d + ":" + (rate(sv.P, () => bossParty(sv.lvl + d - 1, 1.0 * (1 + (d - 1) * B.depthEnemyMul), Math.min(3, Math.floor((d - 1) / B.affixDepthStep)))) + "%").padStart(4));
+  for (const c of [
+    { name: "L8 rare", lvl: 8, sv: geared(8, "rare") },
+    { name: "L20 epic", lvl: 20, sv: geared(20, "epic") },
+    { name: "L40 legendary", lvl: 40, sv: geared(40, "legendary") },
+  ]) {
+    c.P = SK.makePlayerCombatant(c.sv);
+    console.log("  " + c.name.padEnd(14) + " " + depthRow(c).join("  "));
+  }
+}
+
+console.log("\n== XP PACING (cumulative XP to reach each level) ==");
+{
+  let cum = 0, line = [];
+  for (let l = 1; l <= 100; l++) {
+    if ([2, 5, 10, 20, 30, 50, 75, 100].includes(l)) line.push("L" + l + ":" + (cum >= 1000 ? Math.round(cum / 1000) + "k" : cum));
+    cum += SK.xpToNext(l);
+  }
+  console.log("  " + line.join("  "));
 }

@@ -156,7 +156,7 @@
     const def = slots[slotKey];
     const rarity = opts.rarity || SK.rollRarity(opts.luck || 0, opts.rareBoost || 1);
     const rar = SK.RARITIES[rarity];
-    const levelScale = 1 + (level - 1) * 0.12;
+    const levelScale = 1 + (level - 1) * 0.07;
     const variance = () => 0.85 + rand() * 0.3;
 
     const stats = {};
@@ -268,7 +268,9 @@
   };
 
   /* ---------------- XP / levels ---------------- */
-  SK.xpToNext = (level) => Math.round(80 * Math.pow(level, 1.45));
+  // Steeper curve so high levels are a long-haul grind (years-of-play pacing);
+  // early levels stay cheap so the first hour still feels rewarding.
+  SK.xpToNext = (level) => Math.round(65 * Math.pow(level, 1.6));
   SK.addXP = function (save, amount) {
     save.xp += amount;
     const leveled = [];
@@ -311,10 +313,10 @@
     return {
       side: "enemy", name: tpl.name, icon: tpl.icon, isBoss, affixes: [],
       sprite: SK.spritePath(SK.ENEMY_FOLDER[type] || "planet", tpl.name),
-      maxHp: Math.round((90 + level * 26) * hpMult * scale * mul),
-      hp: Math.round((90 + level * 26) * hpMult * scale * mul),
-      atk: Math.round((10 + level * 2.6) * atkMult * atkF),
-      def: Math.round((3 + level * 1.3) * defMult * (0.6 + 0.4 * mul)),
+      maxHp: Math.round((55 + level * 15) * hpMult * scale * mul),
+      hp: Math.round((55 + level * 15) * hpMult * scale * mul),
+      atk: Math.round((7 + level * 1.7) * atkMult * atkF),
+      def: Math.round((2 + level * 1.0) * defMult * (0.6 + 0.4 * mul)),
       spd: isBoss ? 9 : 7 + randInt(0, 4),
       critPct: isBoss ? 10 : 5, critDmgPct: 50,
       evasionPct: isBoss ? 5 : 0, shield: 0, maxShield: 0,

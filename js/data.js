@@ -9,11 +9,11 @@
   /* ---------------- Rarities ---------------- */
   SK.RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary"];
   SK.RARITIES = {
-    common:    { name: "Common",    color: "#9fb0c0", weight: 58, statMult: 1.0, bonusStats: 0, valueMult: 1 },
-    uncommon:  { name: "Uncommon",  color: "#46e08a", weight: 26, statMult: 1.35, bonusStats: 1, valueMult: 2 },
-    rare:      { name: "Rare",      color: "#3d9bff", weight: 11, statMult: 1.85, bonusStats: 2, valueMult: 4 },
-    epic:      { name: "Epic",      color: "#b45cff", weight: 4,  statMult: 2.5,  bonusStats: 3, valueMult: 9 },
-    legendary: { name: "Legendary", color: "#ffb020", weight: 1,  statMult: 3.4,  bonusStats: 4, valueMult: 20 },
+    common:    { name: "Common",    color: "#9fb0c0", weight: 58, statMult: 1.0,  bonusStats: 0, valueMult: 1 },
+    uncommon:  { name: "Uncommon",  color: "#46e08a", weight: 26, statMult: 1.12, bonusStats: 1, valueMult: 2 },
+    rare:      { name: "Rare",      color: "#3d9bff", weight: 11, statMult: 1.28, bonusStats: 2, valueMult: 4 },
+    epic:      { name: "Epic",      color: "#b45cff", weight: 4,  statMult: 1.5,  bonusStats: 3, valueMult: 9 },
+    legendary: { name: "Legendary", color: "#ffb020", weight: 1,  statMult: 1.78, bonusStats: 4, valueMult: 20 },
   };
 
   /* ---------------- Character stats ---------------- */
@@ -26,8 +26,9 @@
     critDmg: { label: "Crit Dmg", icon: "💥", percent: true },
     luck:    { label: "Luck",     icon: "🍀" },
   };
-  // base unit used to scale generated gear
-  SK.CHAR_STAT_UNIT = { hp: 38, attack: 8, defense: 6, speed: 4, crit: 4, critDmg: 12, luck: 5 };
+  // base unit used to scale generated gear (kept small so a single piece is a
+  // modest % boost, not a doubling — power should come from many small steps)
+  SK.CHAR_STAT_UNIT = { hp: 16, attack: 4, defense: 3, speed: 2, crit: 2, critDmg: 7, luck: 4 };
 
   /* ---------------- Ship stats ---------------- */
   SK.SHIP_STAT_META = {
@@ -37,7 +38,7 @@
     targeting: { label: "Targeting", icon: "🛰️", percent: true },
     engine:    { label: "Engines",   icon: "🔥" },
   };
-  SK.SHIP_STAT_UNIT = { hull: 60, shield: 22, weapon: 9, targeting: 4, engine: 5 };
+  SK.SHIP_STAT_UNIT = { hull: 26, shield: 10, weapon: 4, targeting: 2, engine: 3 };
 
   /* ---------------- Equipment slots ---------------- */
   SK.CHAR_SLOTS = {
@@ -149,10 +150,10 @@
     gearNudge: 2.4,
     gearNudgeMax: 9,
     // equipment upgrades
-    upgradePerLevel: 0.10,   // +10% of base stats per upgrade level
+    upgradePerLevel: 0.05,   // +5% of base stats per upgrade level (+25% at max)
     upgradeMaxPlus: 5,
     // set bonus: % to all char stats per equipped epic/legendary item
-    setBonusPerEpic: 0.025,
+    setBonusPerEpic: 0.015,
     // salvage currency gained when selling loot, by rarity
     scrapBySell: { common: 1, uncommon: 2, rare: 5, epic: 12, legendary: 28 },
     // depth ("push deeper") ramp
