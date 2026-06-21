@@ -49,18 +49,21 @@
     _html(player, enemies, isShip) {
       const n = enemies.length;
       const hasBoss = enemies.some((e) => e.isBoss);
-      // size custom-properties tuned so 1-3 enemies fit the row on any width
-      // each sprite fits an object-fit box: height (rem) x width min(vw,px)
-      // enemies rendered 100% bigger, bosses 200% bigger (×2 / ×3 on both axes)
+      // Sprite sizes are relative to the combat frame via container-query units
+      // (#combat-view is a size container), so they scale with the app frame —
+      // same proportions on phone and desktop, and shrinking on short/landscape
+      // screens — instead of the viewport (which overflowed the 540px desktop
+      // frame). rem/px terms are upper caps for the largest frame.
+      //   --es/--bs : sprite height + emoji font-size   --mw/--bmw : image width
       let es, mw, bs = "", bmw = "";
-      if (isShip) { es = "32rem"; mw = "min(144vw,760px)"; }
+      if (isShip) { es = "min(24rem,71cqmin)"; mw = "min(96cqw,500px)"; }
       else if (hasBoss) {
-        bs = n >= 3 ? "39rem" : n === 2 ? "45rem" : "49.5rem";
-        bmw = n >= 3 ? "min(120vw,630px)" : n === 2 ? "min(150vw,780px)" : "min(198vw,1020px)";
-        es = "18rem"; mw = "min(56vw,300px)";
+        bs = n >= 3 ? "min(29rem,86cqmin)" : n === 2 ? "min(34rem,100cqmin)" : "min(37rem,109cqmin)";
+        bmw = n >= 3 ? "min(67cqw,360px)" : n === 2 ? "min(84cqw,430px)" : "min(99cqw,500px)";
+        es = "min(13.5rem,40cqmin)"; mw = "min(42cqw,225px)";
       } else {
-        es = n >= 3 ? "19rem" : n === 2 ? "21rem" : "24rem";
-        mw = n >= 3 ? "min(56vw,300px)" : n === 2 ? "min(84vw,440px)" : "min(120vw,640px)";
+        es = n >= 3 ? "min(14rem,41cqmin)" : n === 2 ? "min(16rem,47cqmin)" : "min(18rem,53cqmin)";
+        mw = n >= 3 ? "min(42cqw,225px)" : n === 2 ? "min(63cqw,330px)" : "min(90cqw,480px)";
       }
       const rowStyle = `--es:${es};--mw:${mw};` + (bs ? `--bs:${bs};--bmw:${bmw};` : "");
 

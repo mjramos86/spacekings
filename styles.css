@@ -402,24 +402,26 @@ button,input{font-family:inherit;}
   text-shadow:0 0 18px rgba(55,230,255,.6); animation:travelpulse .7s ease-in-out infinite alternate;}
 @keyframes travelpulse{from{opacity:.4; transform:scale(.96)} to{opacity:1; transform:scale(1.04)}}
 
-.combat-view{position:absolute; inset:0; display:none; flex-direction:column; z-index:6;}
+/* size container: sprite cqw/cqmin units below resolve against this frame
+   (≤540px, centred on desktop) so combat scales the same on phone + desktop */
+.combat-view{position:absolute; inset:0; display:none; flex-direction:column; z-index:6; container:combat / size;}
 .combat-view.show{display:flex;}
 
 /* enemy area (first-person: enemy ahead) */
 .enemy-area{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative;}
-.enemy-row{display:flex; justify-content:center; align-items:flex-end; gap:1.5vw; width:100%;}
+.enemy-row{display:flex; justify-content:center; align-items:flex-end; gap:1.5cqw; width:100%;}
 .enemy-stack{display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0;}
 .enemy-stack.dead{opacity:.16; transition:opacity .45s ease;}
 .enemy-row .combatant-name{font-size:.8rem;}
 .enemy-row .enemy-stack .hpbar{width:clamp(56px,80%,210px); height:13px;}
-.enemy-sprite{font-size:var(--es,18rem); filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
+.enemy-sprite{font-size:var(--es,min(18rem,53cqmin)); filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); animation:enemyidle 2.4s ease-in-out infinite;}
 .enemy-emoji{display:inline-block;}
-.enemy-img{display:none; height:var(--es,24rem); width:var(--mw,120vw); object-fit:contain; object-position:50% 100%; image-rendering:pixelated; image-rendering:crisp-edges; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
-.enemy-sprite.boss .enemy-img{height:var(--bs,49.5rem); width:var(--bmw,198vw);}
-.enemy-sprite.ship .enemy-img{height:var(--es,32rem); width:var(--mw,144vw);}
+.enemy-img{display:none; height:var(--es,min(18rem,53cqmin)); width:var(--mw,min(90cqw,480px)); object-fit:contain; object-position:50% 100%; image-rendering:pixelated; image-rendering:crisp-edges; filter:drop-shadow(0 10px 16px rgba(0,0,0,.55));}
+.enemy-sprite.boss .enemy-img{height:var(--bs,min(37rem,109cqmin)); width:var(--bmw,min(99cqw,500px));}
+.enemy-sprite.ship .enemy-img{height:var(--es,min(24rem,71cqmin)); width:var(--mw,min(96cqw,500px));}
 .enemy-sprite.hasimg .enemy-emoji{display:none;}
 .enemy-sprite.hasimg .enemy-img{display:block;}
-.enemy-sprite.boss{font-size:var(--bs,36rem); animation:bossidle 2s ease-in-out infinite;}
+.enemy-sprite.boss{font-size:var(--bs,min(37rem,109cqmin)); animation:bossidle 2s ease-in-out infinite;}
 @keyframes enemyidle{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes bossidle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}
 .enemy-sprite.hit{animation:hitshake .28s;}
